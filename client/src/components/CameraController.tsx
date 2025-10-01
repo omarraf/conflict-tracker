@@ -12,6 +12,35 @@ interface CameraControllerProps {
 export function CameraController({ conflictCount, timelineRange }: CameraControllerProps) {
   const { camera, controls } = useThree();
   const prevStateRef = useRef({ count: conflictCount, range: [...timelineRange] as [number, number] });
+  const isUserInteractingRef = useRef(false);
+  const animationsRef = useRef<gsap.core.Tween[]>([]);
+
+  // Listen for user interaction with OrbitControls
+  useEffect(() => {
+    const orbitControls = controls as unknown as OrbitControlsImpl | null;
+    if (!orbitControls) return;
+
+    const onInteractionStart = () => {
+      isUserInteractingRef.current = true;
+      // Kill any running camera animations when user starts interacting
+      animationsRef.current.forEach(tween => tween.kill());
+      animationsRef.current = [];
+      gsap.killTweensOf(camera.position);
+      gsap.killTweensOf(camera);
+    };
+
+    const onInteractionEnd = () => {
+      isUserInteractingRef.current = false;
+    };
+
+    orbitControls.addEventListener('start', onInteractionStart);
+    orbitControls.addEventListener('end', onInteractionEnd);
+
+    return () => {
+      orbitControls.removeEventListener('start', onInteractionStart);
+      orbitControls.removeEventListener('end', onInteractionEnd);
+    };
+  }, [controls, camera]);
 
   useEffect(() => {
     if (!prevStateRef.current.range) return;
@@ -21,8 +50,10 @@ export function CameraController({ conflictCount, timelineRange }: CameraControl
                       prevStateRef.current.range[0] !== timelineRange[0] ||
                       prevStateRef.current.range[1] !== timelineRange[1];
     
-    if (hasChanged) {
+    if (hasChanged && !isUserInteractingRef.current) {
       // Kill any existing animations for responsiveness
+      animationsRef.current.forEach(tween => tween.kill());
+      animationsRef.current = [];
       gsap.killTweensOf(camera.position);
       gsap.killTweensOf(camera);
       
@@ -35,7 +66,7 @@ export function CameraController({ conflictCount, timelineRange }: CameraControl
       const direction = currentPos.clone().normalize();
       const targetPos = direction.multiplyScalar(targetDistance);
       
-      gsap.to(camera.position, {
+      const positionTween = gsap.to(camera.position, {
         x: targetPos.x,
         y: targetPos.y,
         z: targetPos.z,
@@ -50,7 +81,7 @@ export function CameraController({ conflictCount, timelineRange }: CameraControl
       });
       
       // More conflicts = wider FOV for better overview
-      gsap.to(camera, {
+      const fovTween = gsap.to(camera, {
         fov: conflictCount === 0 ? 45 : Math.max(45, Math.min(60, 50 + conflictCount * 0.5)),
         duration: 1.5,
         ease: 'power2.inOut',
@@ -58,6 +89,8 @@ export function CameraController({ conflictCount, timelineRange }: CameraControl
           camera.updateProjectionMatrix();
         }
       });
+
+      animationsRef.current = [positionTween, fovTween];
       
       prevStateRef.current = { count: conflictCount, range: [...timelineRange] as [number, number] };
     }
