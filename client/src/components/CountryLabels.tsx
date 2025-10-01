@@ -106,7 +106,7 @@ function CountryLabel({ name, position, priority }: CountryLabelProps) {
 
   return (
     <object3D ref={labelRef} position={position}>
-      <Html center>
+      <Html center zIndexRange={[0, 0]}>
         <div
           ref={htmlRef}
           style={{
