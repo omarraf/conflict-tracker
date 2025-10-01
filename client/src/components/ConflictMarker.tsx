@@ -61,7 +61,7 @@ export function ConflictMarker({ conflict, onSelect, isSelected, globeRadius }: 
     });
   }, [hovered, isSelected]);
 
-  // Unified pulsing animation with lerped scaling
+  // Unified pulsing animation with lerped scaling - subtle for smooth UX
   useFrame((state) => {
     if (markerRef.current && stemRef.current) {
       const material1 = markerRef.current.material as THREE.MeshStandardMaterial;
@@ -69,14 +69,14 @@ export function ConflictMarker({ conflict, onSelect, isSelected, globeRadius }: 
       material1.emissiveIntensity = emissiveRef.current.intensity;
       material2.emissiveIntensity = emissiveRef.current.intensity * 0.6;
       
-      const idlePulse = 1 + Math.sin(state.clock.elapsedTime * 2 + conflict.latitude) * 0.05;
-      const selectedPulse = isSelected ? (1 + Math.sin(state.clock.elapsedTime * 3) * 0.15) : 1;
-      const hoverScale = hovered ? 1.2 : 1;
-      const selectedScale = isSelected ? 1.3 : 1;
+      const idlePulse = 1 + Math.sin(state.clock.elapsedTime * 2 + conflict.latitude) * 0.03;
+      const selectedPulse = isSelected ? (1 + Math.sin(state.clock.elapsedTime * 3) * 0.08) : 1;
+      const hoverScale = hovered ? 1.1 : 1;
+      const selectedScale = isSelected ? 1.15 : 1;
       
       const targetScale = idlePulse * selectedPulse * hoverScale * selectedScale;
-      markerRef.current.scale.lerp(new THREE.Vector3(targetScale, targetScale, targetScale), 0.1);
-      stemRef.current.scale.lerp(new THREE.Vector3(targetScale, targetScale, targetScale), 0.1);
+      markerRef.current.scale.lerp(new THREE.Vector3(targetScale, targetScale, targetScale), 0.15);
+      stemRef.current.scale.lerp(new THREE.Vector3(targetScale, targetScale, targetScale), 0.15);
     }
   });
 
