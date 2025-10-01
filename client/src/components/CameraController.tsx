@@ -12,10 +12,9 @@ interface CameraControllerProps {
 export function CameraController({ conflictCount, timelineRange }: CameraControllerProps) {
   const { camera, controls } = useThree();
   const prevStateRef = useRef({ count: conflictCount, range: [...timelineRange] as [number, number] });
-  const animatingRef = useRef(false);
 
   useEffect(() => {
-    if (animatingRef.current || !prevStateRef.current.range) return;
+    if (!prevStateRef.current.range) return;
     
     const orbitControls = controls as unknown as OrbitControlsImpl | null;
     const hasChanged = prevStateRef.current.count !== conflictCount || 
@@ -23,9 +22,14 @@ export function CameraController({ conflictCount, timelineRange }: CameraControl
                       prevStateRef.current.range[1] !== timelineRange[1];
     
     if (hasChanged) {
-      animatingRef.current = true;
+      // Kill any existing animations for responsiveness
+      gsap.killTweensOf(camera.position);
+      gsap.killTweensOf(camera);
       
-      const targetDistance = conflictCount === 0 ? 8 : Math.max(4, Math.min(7, 5 + (10 - conflictCount) * 0.2));
+      // Invert zoom logic: more conflicts = zoom OUT for broader context
+      // 0 conflicts: closer view (distance 5)
+      // Many conflicts: farther view (distance 8+)
+      const targetDistance = conflictCount === 0 ? 5 : Math.max(5, Math.min(10, 6 + conflictCount * 0.3));
       
       const currentPos = camera.position.clone();
       const direction = currentPos.clone().normalize();
@@ -42,14 +46,12 @@ export function CameraController({ conflictCount, timelineRange }: CameraControl
           if (orbitControls) {
             orbitControls.update();
           }
-        },
-        onComplete: () => {
-          animatingRef.current = false;
         }
       });
       
+      // More conflicts = wider FOV for better overview
       gsap.to(camera, {
-        fov: conflictCount === 0 ? 50 : Math.max(40, Math.min(50, 45 - conflictCount * 0.3)),
+        fov: conflictCount === 0 ? 45 : Math.max(45, Math.min(60, 50 + conflictCount * 0.5)),
         duration: 1.5,
         ease: 'power2.inOut',
         onUpdate: () => {
