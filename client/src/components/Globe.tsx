@@ -1,9 +1,18 @@
 import { useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
+import { useTexture } from '@react-three/drei';
 import * as THREE from 'three';
+import { CountryBorders } from './CountryBorders';
 
 export function Globe() {
   const globeRef = useRef<THREE.Mesh>(null);
+  
+  // Load Earth day texture
+  const earthTexture = useTexture('/textures/earth_daymap.jpg');
+  
+  // Configure texture for proper rendering
+  earthTexture.colorSpace = THREE.SRGBColorSpace;
+  earthTexture.anisotropy = 16;
 
   // Slow auto-rotation
   useFrame(() => {
@@ -13,41 +22,26 @@ export function Globe() {
   });
 
   return (
-    <mesh ref={globeRef} rotation={[0, 0, 0]}>
-      {/* Sphere geometry for the globe */}
-      <sphereGeometry args={[2, 64, 64]} />
-      
-      {/* Material with blue/green earth-like appearance */}
-      <meshStandardMaterial
-        color="#1e3a5f"
-        roughness={0.7}
-        metalness={0.2}
-        emissive="#0a1929"
-        emissiveIntensity={0.2}
-      />
-      
-      {/* Continents overlay using wireframe for simple land representation */}
+    <group ref={globeRef as any} rotation={[0, 0, 0]}>
+      {/* Sphere geometry for the globe - high detail for realistic texture */}
       <mesh>
-        <sphereGeometry args={[2.01, 32, 32]} />
-        <meshBasicMaterial
-          color="#2d5a3d"
-          wireframe={true}
-          opacity={0.3}
-          transparent={true}
-        />
-      </mesh>
-      
-      {/* Ocean with slight transparency */}
-      <mesh>
-        <sphereGeometry args={[1.99, 64, 64]} />
+        <sphereGeometry args={[2, 128, 128]} />
+        
+        {/* Realistic Earth material with texture map */}
         <meshStandardMaterial
-          color="#1a4d6f"
-          roughness={0.3}
-          metalness={0.5}
-          opacity={0.9}
-          transparent={true}
+          map={earthTexture}
+          roughness={0.8}
+          metalness={0.1}
         />
       </mesh>
-    </mesh>
+
+      {/* Country borders overlay */}
+      <CountryBorders 
+        radius={2.005}
+        color="#ffffff"
+        lineWidth={1.2}
+        opacity={0.5}
+      />
+    </group>
   );
 }
