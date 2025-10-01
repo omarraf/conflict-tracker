@@ -7,6 +7,8 @@ import { Globe } from './components/Globe';
 import { ConflictMarker } from './components/ConflictMarker';
 import { ConflictSidebar } from './components/ConflictSidebar';
 import { FilterPanel } from './components/FilterPanel';
+import { Timeline } from './components/Timeline';
+import { CameraController } from './components/CameraController';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { Conflict, FilterState } from './types/conflict';
 import conflictsData from './data/conflicts.json';
@@ -14,6 +16,7 @@ import conflictsData from './data/conflicts.json';
 function App() {
   const [selectedConflict, setSelectedConflict] = useState<Conflict | null>(null);
   const [webglSupported, setWebglSupported] = useState(true);
+  const [timelineRange, setTimelineRange] = useState<[number, number]>([1989, 2025]);
   const [filters, setFilters] = useState<FilterState>({
     region: 'All Regions',
     severity: 'All Severities',
@@ -54,6 +57,12 @@ function App() {
   const filteredConflicts = useMemo(() => {
     let filtered = conflictsData as Conflict[];
 
+    // Filter by timeline year range
+    filtered = filtered.filter((c) => {
+      const startYear = new Date(c.startDate).getFullYear();
+      return startYear >= timelineRange[0] && startYear <= timelineRange[1];
+    });
+
     // Filter by region
     if (filters.region !== 'All Regions') {
       filtered = filtered.filter((c) => c.region === filters.region);
@@ -64,7 +73,7 @@ function App() {
       filtered = filtered.filter((c) => c.severity === filters.severity);
     }
 
-    // Filter by timeline
+    // Filter by timeline preset
     if (filters.timeline !== 'All Time') {
       const now = new Date();
       const yearMap: Record<string, number> = {
@@ -97,7 +106,7 @@ function App() {
     }
 
     return filtered;
-  }, [filters]);
+  }, [filters, timelineRange]);
 
   console.log('Filtered conflicts count:', filteredConflicts.length);
 
@@ -130,8 +139,20 @@ function App() {
         onClose={() => setSelectedConflict(null)}
       />
 
-      {/* Instructions - Fixed Bottom */}
-      <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-30 pointer-events-none">
+      {/* Timeline - Fixed Bottom Center */}
+      <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-30 w-[500px]">
+        <Timeline
+          onTimeRangeChange={(start, end) => {
+            setTimelineRange([start, end]);
+            setFilters(prev => ({ ...prev, timeline: 'All Time' }));
+          }}
+          minYear={1989}
+          maxYear={2025}
+        />
+      </div>
+
+      {/* Instructions - Fixed Bottom Right */}
+      <div className="fixed bottom-6 right-6 z-30">
         <div className="bg-gray-900/90 backdrop-blur-lg px-4 py-2 rounded-lg border border-white/10 shadow-xl">
           <p className="text-xs text-gray-300 text-center">
             Click and drag to rotate • Scroll to zoom • Click markers for details
@@ -192,6 +213,9 @@ function App() {
                 />
               ))}
             </Suspense>
+
+            {/* Camera Controller for animated transitions */}
+            <CameraController conflictCount={filteredConflicts.length} />
 
             {/* Camera Controls */}
             <OrbitControls
