@@ -1,0 +1,352 @@
+[
+  {
+    "id": "ukraine-russia-2022",
+    "name": "Russo-Ukrainian War",
+    "startDate": "2022-02-24",
+    "casualties": 500000,
+    "countries": ["Ukraine", "Russia"],
+    "region": "Eastern Europe",
+    "severity": "critical",
+    "latitude": 48.3794,
+    "longitude": 31.1656,
+    "description": "Large-scale military conflict initiated by Russia's invasion of Ukraine in February 2022, resulting in significant casualties and displacement.",
+    "mediaLinks": [
+      {
+        "type": "article",
+        "url": "https://www.bbc.com/news/world-europe-60506682",
+        "title": "BBC: Ukraine Conflict Overview"
+      },
+      {
+        "type": "article",
+        "url": "https://www.aljazeera.com/tag/russia-ukraine-war/",
+        "title": "Al Jazeera: Russia-Ukraine Coverage"
+      }
+    ],
+    "educationalResources": [
+      {
+        "title": "Council on Foreign Relations: Conflict in Ukraine",
+        "url": "https://www.cfr.org/global-conflict-tracker/conflict/conflict-ukraine"
+      },
+      {
+        "title": "International Crisis Group: Ukraine Analysis",
+        "url": "https://www.crisisgroup.org/europe-central-asia/eastern-europe/ukraine"
+      }
+    ],
+    "status": "ongoing"
+  },
+  {
+    "id": "israel-gaza-2023",
+    "name": "Israel-Gaza Conflict",
+    "startDate": "2023-10-07",
+    "casualties": 45000,
+    "countries": ["Israel", "Palestine"],
+    "region": "Middle East",
+    "severity": "critical",
+    "latitude": 31.5,
+    "longitude": 34.4668,
+    "description": "Major escalation in the Israeli-Palestinian conflict following attacks in October 2023, resulting in extensive military operations in Gaza.",
+    "mediaLinks": [
+      {
+        "type": "article",
+        "url": "https://www.bbc.com/news/world-middle-east-67039975",
+        "title": "BBC: Israel-Gaza War"
+      },
+      {
+        "type": "article",
+        "url": "https://www.aljazeera.com/where/gaza/",
+        "title": "Al Jazeera: Gaza Coverage"
+      }
+    ],
+    "educationalResources": [
+      {
+        "title": "UN: Israeli-Palestinian Conflict",
+        "url": "https://www.un.org/unispal/"
+      },
+      {
+        "title": "International Crisis Group: Israel/Palestine",
+        "url": "https://www.crisisgroup.org/middle-east-north-africa/eastern-mediterranean/israelpalestine"
+      }
+    ],
+    "status": "ongoing"
+  },
+  {
+    "id": "sudan-2023",
+    "name": "Sudan Civil War",
+    "startDate": "2023-04-15",
+    "casualties": 15000,
+    "countries": ["Sudan"],
+    "region": "Africa",
+    "severity": "high",
+    "latitude": 15.5007,
+    "longitude": 32.5599,
+    "description": "Armed conflict between rival military factions in Sudan, causing widespread displacement and humanitarian crisis.",
+    "mediaLinks": [
+      {
+        "type": "article",
+        "url": "https://www.bbc.com/news/world-africa-65302118",
+        "title": "BBC: Sudan Conflict"
+      },
+      {
+        "type": "article",
+        "url": "https://www.aljazeera.com/tag/sudan/",
+        "title": "Al Jazeera: Sudan Coverage"
+      }
+    ],
+    "educationalResources": [
+      {
+        "title": "International Crisis Group: Sudan",
+        "url": "https://www.crisisgroup.org/africa/horn-africa/sudan"
+      },
+      {
+        "title": "UNHCR: Sudan Situation",
+        "url": "https://www.unhcr.org/sudan-emergency"
+      }
+    ],
+    "status": "ongoing"
+  },
+  {
+    "id": "myanmar-2021",
+    "name": "Myanmar Civil War",
+    "startDate": "2021-02-01",
+    "casualties": 50000,
+    "countries": ["Myanmar"],
+    "region": "Southeast Asia",
+    "severity": "high",
+    "latitude": 21.9162,
+    "longitude": 95.956,
+    "description": "Armed conflict following the military coup in Myanmar, with widespread resistance movements and ethnic conflicts.",
+    "mediaLinks": [
+      {
+        "type": "article",
+        "url": "https://www.bbc.com/news/world-asia-55902070",
+        "title": "BBC: Myanmar Coup and Conflict"
+      },
+      {
+        "type": "article",
+        "url": "https://www.aljazeera.com/tag/myanmar/",
+        "title": "Al Jazeera: Myanmar Coverage"
+      }
+    ],
+    "educationalResources": [
+      {
+        "title": "International Crisis Group: Myanmar",
+        "url": "https://www.crisisgroup.org/asia/south-east-asia/myanmar"
+      },
+      {
+        "title": "Human Rights Watch: Myanmar",
+        "url": "https://www.hrw.org/asia/myanmar-burma"
+      }
+    ],
+    "status": "ongoing"
+  },
+  {
+    "id": "syria-civil-war",
+    "name": "Syrian Civil War",
+    "startDate": "2011-03-15",
+    "casualties": 600000,
+    "countries": ["Syria"],
+    "region": "Middle East",
+    "severity": "critical",
+    "latitude": 34.8021,
+    "longitude": 38.9968,
+    "description": "Long-running civil war in Syria involving government forces, opposition groups, and international actors.",
+    "mediaLinks": [
+      {
+        "type": "article",
+        "url": "https://www.bbc.com/news/world-middle-east-14703995",
+        "title": "BBC: Syria Civil War"
+      },
+      {
+        "type": "article",
+        "url": "https://www.aljazeera.com/tag/syrian-civil-war/",
+        "title": "Al Jazeera: Syria Coverage"
+      }
+    ],
+    "educationalResources": [
+      {
+        "title": "International Crisis Group: Syria",
+        "url": "https://www.crisisgroup.org/middle-east-north-africa/eastern-mediterranean/syria"
+      },
+      {
+        "title": "UNHCR: Syria Emergency",
+        "url": "https://www.unhcr.org/syria-emergency"
+      }
+    ],
+    "status": "ongoing"
+  },
+  {
+    "id": "yemen-civil-war",
+    "name": "Yemeni Civil War",
+    "startDate": "2014-09-21",
+    "casualties": 377000,
+    "countries": ["Yemen", "Saudi Arabia"],
+    "region": "Middle East",
+    "severity": "critical",
+    "latitude": 15.552727,
+    "longitude": 48.516388,
+    "description": "Ongoing conflict in Yemen between government forces and Houthi rebels, with regional involvement.",
+    "mediaLinks": [
+      {
+        "type": "article",
+        "url": "https://www.bbc.com/news/world-middle-east-29319423",
+        "title": "BBC: Yemen Crisis"
+      },
+      {
+        "type": "article",
+        "url": "https://www.aljazeera.com/tag/yemen-war/",
+        "title": "Al Jazeera: Yemen Coverage"
+      }
+    ],
+    "educationalResources": [
+      {
+        "title": "International Crisis Group: Yemen",
+        "url": "https://www.crisisgroup.org/middle-east-north-africa/gulf-and-arabian-peninsula/yemen"
+      },
+      {
+        "title": "UN: Yemen Humanitarian Crisis",
+        "url": "https://www.unocha.org/yemen"
+      }
+    ],
+    "status": "ongoing"
+  },
+  {
+    "id": "ethiopia-tigray",
+    "name": "Tigray War",
+    "startDate": "2020-11-03",
+    "casualties": 600000,
+    "countries": ["Ethiopia"],
+    "region": "Africa",
+    "severity": "high",
+    "latitude": 14.0,
+    "longitude": 38.0,
+    "description": "Armed conflict in the Tigray region of Ethiopia between government forces and Tigray People's Liberation Front.",
+    "mediaLinks": [
+      {
+        "type": "article",
+        "url": "https://www.bbc.com/news/world-africa-54964378",
+        "title": "BBC: Tigray Conflict"
+      },
+      {
+        "type": "article",
+        "url": "https://www.aljazeera.com/tag/tigray/",
+        "title": "Al Jazeera: Tigray Coverage"
+      }
+    ],
+    "educationalResources": [
+      {
+        "title": "International Crisis Group: Ethiopia",
+        "url": "https://www.crisisgroup.org/africa/horn-africa/ethiopia"
+      },
+      {
+        "title": "Human Rights Watch: Ethiopia",
+        "url": "https://www.hrw.org/africa/ethiopia"
+      }
+    ],
+    "status": "ongoing"
+  },
+  {
+    "id": "sahel-terrorism",
+    "name": "Sahel Insurgency",
+    "startDate": "2011-01-17",
+    "casualties": 30000,
+    "countries": ["Mali", "Niger", "Burkina Faso"],
+    "region": "Africa",
+    "severity": "high",
+    "latitude": 17.0,
+    "longitude": 0.0,
+    "description": "Ongoing insurgency by jihadist groups across the Sahel region of Africa.",
+    "mediaLinks": [
+      {
+        "type": "article",
+        "url": "https://www.bbc.com/news/world-africa-57860993",
+        "title": "BBC: Sahel Crisis"
+      },
+      {
+        "type": "article",
+        "url": "https://www.aljazeera.com/tag/sahel/",
+        "title": "Al Jazeera: Sahel Coverage"
+      }
+    ],
+    "educationalResources": [
+      {
+        "title": "International Crisis Group: Sahel",
+        "url": "https://www.crisisgroup.org/africa/sahel"
+      },
+      {
+        "title": "UN: Sahel Security",
+        "url": "https://www.un.org/en/desa/sahel"
+      }
+    ],
+    "status": "ongoing"
+  },
+  {
+    "id": "kashmir-dispute",
+    "name": "Kashmir Conflict",
+    "startDate": "1989-01-01",
+    "casualties": 70000,
+    "countries": ["India", "Pakistan"],
+    "region": "South Asia",
+    "severity": "medium",
+    "latitude": 34.0837,
+    "longitude": 74.7973,
+    "description": "Territorial dispute between India and Pakistan over the Kashmir region.",
+    "mediaLinks": [
+      {
+        "type": "article",
+        "url": "https://www.bbc.com/news/10537286",
+        "title": "BBC: Kashmir Conflict"
+      },
+      {
+        "type": "article",
+        "url": "https://www.aljazeera.com/tag/kashmir/",
+        "title": "Al Jazeera: Kashmir Coverage"
+      }
+    ],
+    "educationalResources": [
+      {
+        "title": "International Crisis Group: Kashmir",
+        "url": "https://www.crisisgroup.org/asia/south-asia/kashmir"
+      },
+      {
+        "title": "Council on Foreign Relations: Kashmir",
+        "url": "https://www.cfr.org/backgrounder/kashmir-conflict"
+      }
+    ],
+    "status": "ongoing"
+  },
+  {
+    "id": "drc-eastern-conflict",
+    "name": "Eastern DRC Conflict",
+    "startDate": "1996-10-24",
+    "casualties": 120000,
+    "countries": ["Democratic Republic of Congo"],
+    "region": "Africa",
+    "severity": "high",
+    "latitude": -2.877,
+    "longitude": 28.323,
+    "description": "Long-running conflict in eastern DRC involving multiple armed groups and mineral resource disputes.",
+    "mediaLinks": [
+      {
+        "type": "article",
+        "url": "https://www.bbc.com/news/world-africa-13283212",
+        "title": "BBC: DR Congo Conflict"
+      },
+      {
+        "type": "article",
+        "url": "https://www.aljazeera.com/tag/democratic-republic-of-congo/",
+        "title": "Al Jazeera: DRC Coverage"
+      }
+    ],
+    "educationalResources": [
+      {
+        "title": "International Crisis Group: DRC",
+        "url": "https://www.crisisgroup.org/africa/central-africa/democratic-republic-congo"
+      },
+      {
+        "title": "UNHCR: DRC Emergency",
+        "url": "https://www.unhcr.org/drc-emergency"
+      }
+    ],
+    "status": "ongoing"
+  }
+]
