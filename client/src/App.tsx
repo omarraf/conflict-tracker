@@ -1,7 +1,7 @@
 import { Canvas } from '@react-three/fiber';
 import { Suspense, useState, useMemo, useEffect } from 'react';
 import { OrbitControls, Stars } from '@react-three/drei';
-import { GitCompare } from 'lucide-react';
+import { GitCompare, Download } from 'lucide-react';
 import '@fontsource/inter';
 
 import { Globe } from './components/Globe';
@@ -12,8 +12,10 @@ import { Timeline } from './components/Timeline';
 import { CameraController } from './components/CameraController';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { ComparisonView } from './components/ComparisonView';
+import { ExportPanel } from './components/ExportPanel';
 import { Conflict, FilterState } from './types/conflict';
 import conflictsData from './data/conflicts.json';
+import { useURLState } from './hooks/useURLState';
 
 function App() {
   const [selectedConflict, setSelectedConflict] = useState<Conflict | null>(null);
@@ -21,12 +23,15 @@ function App() {
   const [timelineRange, setTimelineRange] = useState<[number, number]>([1989, 2025]);
   const [comparisonConflicts, setComparisonConflicts] = useState<Conflict[]>([]);
   const [showComparison, setShowComparison] = useState(false);
+  const [showExport, setShowExport] = useState(false);
   const [filters, setFilters] = useState<FilterState>({
     region: 'All Regions',
     severity: 'All Severities',
     timeline: 'All Time',
     searchQuery: '',
   });
+
+  const { parseURLState, updateURL, isInitialized, setIsInitialized } = useURLState();
 
   useEffect(() => {
     try {
@@ -56,6 +61,25 @@ function App() {
       setWebglSupported(false);
     }
   }, []);
+
+  useEffect(() => {
+    if (!isInitialized) {
+      const urlState = parseURLState();
+      if (urlState.filters) {
+        setFilters(urlState.filters);
+      }
+      if (urlState.timelineRange) {
+        setTimelineRange(urlState.timelineRange);
+      }
+      setIsInitialized(true);
+    }
+  }, [isInitialized, parseURLState, setIsInitialized]);
+
+  useEffect(() => {
+    if (isInitialized) {
+      updateURL(filters, timelineRange);
+    }
+  }, [filters, timelineRange, isInitialized, updateURL]);
 
   // Filter conflicts based on current filter state
   const filteredConflicts = useMemo(() => {
@@ -170,9 +194,9 @@ function App() {
         isInComparison={selectedConflict ? comparisonConflicts.some((c) => c.id === selectedConflict.id) : false}
       />
 
-      {/* Comparison Button - Fixed Top Right */}
-      {comparisonConflicts.length > 0 && (
-        <div className="fixed top-6 right-6 z-40">
+      {/* Action Buttons - Fixed Top Right */}
+      <div className="fixed top-6 right-6 z-40 flex gap-3">
+        {comparisonConflicts.length > 0 && (
           <button
             onClick={() => setShowComparison(true)}
             className="bg-blue-500/90 hover:bg-blue-500 backdrop-blur-lg px-4 py-3 rounded-lg border border-blue-400/30 shadow-xl transition-all hover:scale-105"
@@ -184,8 +208,17 @@ function App() {
               </span>
             </div>
           </button>
-        </div>
-      )}
+        )}
+        <button
+          onClick={() => setShowExport(true)}
+          className="bg-gray-800/90 hover:bg-gray-700 backdrop-blur-lg px-4 py-3 rounded-lg border border-white/20 shadow-xl transition-all hover:scale-105"
+        >
+          <div className="flex items-center gap-2">
+            <Download className="w-5 h-5 text-white" />
+            <span className="text-white font-medium">Export</span>
+          </div>
+        </button>
+      </div>
 
       {/* Comparison View Modal */}
       {showComparison && (
@@ -195,6 +228,13 @@ function App() {
           onClose={() => setShowComparison(false)}
         />
       )}
+
+      {/* Export Panel */}
+      <ExportPanel
+        conflicts={filteredConflicts}
+        isOpen={showExport}
+        onClose={() => setShowExport(false)}
+      />
 
       {/* Timeline - Fixed Bottom Center */}
       <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-30 w-[500px]">
