@@ -3,6 +3,7 @@ import { useFrame } from '@react-three/fiber';
 import { useTexture } from '@react-three/drei';
 import * as THREE from 'three';
 import { CountryBorders } from './CountryBorders';
+import { CountryLabels } from './CountryLabels';
 
 export function Globe() {
   const globeRef = useRef<THREE.Mesh>(null);
@@ -42,6 +43,9 @@ export function Globe() {
         lineWidth={1.2}
         opacity={0.5}
       />
+      
+      {/* Country labels with intelligent scaling and fading */}
+      <CountryLabels radius={2.1} />
     </group>
   );
 }
