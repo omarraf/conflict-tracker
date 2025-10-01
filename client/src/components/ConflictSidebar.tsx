@@ -1,4 +1,4 @@
-import { X, Calendar, Users, MapPin, ExternalLink, BookOpen, TrendingUp } from 'lucide-react';
+import { X, Calendar, Users, MapPin, ExternalLink, BookOpen, TrendingUp, GitCompare } from 'lucide-react';
 import { Conflict } from '../types/conflict';
 import { formatNumber, getYearsSince } from '../lib/coordinates';
 import { Button } from './ui/button';
@@ -10,9 +10,11 @@ import { ScrollArea } from './ui/scroll-area';
 interface ConflictSidebarProps {
   conflict: Conflict | null;
   onClose: () => void;
+  onCompare?: (conflict: Conflict) => void;
+  isInComparison?: boolean;
 }
 
-export function ConflictSidebar({ conflict, onClose }: ConflictSidebarProps) {
+export function ConflictSidebar({ conflict, onClose, onCompare, isInComparison }: ConflictSidebarProps) {
   if (!conflict) return null;
 
   const yearsSince = getYearsSince(conflict.startDate);
@@ -40,14 +42,27 @@ export function ConflictSidebar({ conflict, onClose }: ConflictSidebarProps) {
                 </Badge>
               </div>
             </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={onClose}
-              className="text-white hover:bg-white/10"
-            >
-              <X className="h-5 w-5" />
-            </Button>
+            <div className="flex gap-2">
+              {onCompare && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => onCompare(conflict)}
+                  className={`text-white ${isInComparison ? 'bg-blue-500/20 hover:bg-blue-500/30' : 'hover:bg-white/10'}`}
+                  title={isInComparison ? 'Remove from comparison' : 'Add to comparison'}
+                >
+                  <GitCompare className="h-5 w-5" />
+                </Button>
+              )}
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={onClose}
+                className="text-white hover:bg-white/10"
+              >
+                <X className="h-5 w-5" />
+              </Button>
+            </div>
           </div>
 
           {/* Key Information */}

@@ -1,6 +1,7 @@
 import { Canvas } from '@react-three/fiber';
 import { Suspense, useState, useMemo, useEffect } from 'react';
 import { OrbitControls, Stars } from '@react-three/drei';
+import { GitCompare } from 'lucide-react';
 import '@fontsource/inter';
 
 import { Globe } from './components/Globe';
@@ -10,6 +11,7 @@ import { FilterPanel } from './components/FilterPanel';
 import { Timeline } from './components/Timeline';
 import { CameraController } from './components/CameraController';
 import { ErrorBoundary } from './components/ErrorBoundary';
+import { ComparisonView } from './components/ComparisonView';
 import { Conflict, FilterState } from './types/conflict';
 import conflictsData from './data/conflicts.json';
 
@@ -17,6 +19,8 @@ function App() {
   const [selectedConflict, setSelectedConflict] = useState<Conflict | null>(null);
   const [webglSupported, setWebglSupported] = useState(true);
   const [timelineRange, setTimelineRange] = useState<[number, number]>([1989, 2025]);
+  const [comparisonConflicts, setComparisonConflicts] = useState<Conflict[]>([]);
+  const [showComparison, setShowComparison] = useState(false);
   const [filters, setFilters] = useState<FilterState>({
     region: 'All Regions',
     severity: 'All Severities',
@@ -110,6 +114,31 @@ function App() {
 
   console.log('Filtered conflicts count:', filteredConflicts.length);
 
+  const toggleComparison = (conflict: Conflict) => {
+    setComparisonConflicts((prev) => {
+      const exists = prev.find((c) => c.id === conflict.id);
+      if (exists) {
+        return prev.filter((c) => c.id !== conflict.id);
+      } else {
+        if (prev.length >= 4) {
+          alert('Maximum 4 conflicts can be compared at once. Please remove one before adding another.');
+          return prev;
+        }
+        return [...prev, conflict];
+      }
+    });
+  };
+
+  const removeFromComparison = (id: string) => {
+    setComparisonConflicts((prev) => {
+      const newList = prev.filter((c) => c.id !== id);
+      if (newList.length === 0) {
+        setShowComparison(false);
+      }
+      return newList;
+    });
+  };
+
   return (
     <div style={{ width: '100vw', height: '100vh', position: 'relative', overflow: 'hidden' }}>
       {/* Filter Panel - Fixed Top Left */}
@@ -137,7 +166,35 @@ function App() {
       <ConflictSidebar
         conflict={selectedConflict}
         onClose={() => setSelectedConflict(null)}
+        onCompare={toggleComparison}
+        isInComparison={selectedConflict ? comparisonConflicts.some((c) => c.id === selectedConflict.id) : false}
       />
+
+      {/* Comparison Button - Fixed Top Right */}
+      {comparisonConflicts.length > 0 && (
+        <div className="fixed top-6 right-6 z-40">
+          <button
+            onClick={() => setShowComparison(true)}
+            className="bg-blue-500/90 hover:bg-blue-500 backdrop-blur-lg px-4 py-3 rounded-lg border border-blue-400/30 shadow-xl transition-all hover:scale-105"
+          >
+            <div className="flex items-center gap-2">
+              <GitCompare className="w-5 h-5 text-white" />
+              <span className="text-white font-medium">
+                Compare ({comparisonConflicts.length})
+              </span>
+            </div>
+          </button>
+        </div>
+      )}
+
+      {/* Comparison View Modal */}
+      {showComparison && (
+        <ComparisonView
+          conflicts={comparisonConflicts}
+          onRemove={removeFromComparison}
+          onClose={() => setShowComparison(false)}
+        />
+      )}
 
       {/* Timeline - Fixed Bottom Center */}
       <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-30 w-[500px]">
