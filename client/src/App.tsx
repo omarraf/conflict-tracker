@@ -1,5 +1,5 @@
 import { Canvas } from '@react-three/fiber';
-import { Suspense, useState, useMemo, useEffect } from 'react';
+import { Suspense, useState, useMemo, useEffect, useCallback } from 'react';
 import { OrbitControls, Stars } from '@react-three/drei';
 import { GitCompare, Download, Filter, Menu } from 'lucide-react';
 import '@fontsource/inter';
@@ -17,6 +17,8 @@ import { Conflict, FilterState } from './types/conflict';
 import conflictsData from './data/conflicts.json';
 import { useURLState } from './hooks/useURLState';
 import { useIsMobile } from './hooks/use-is-mobile';
+import { useConflictUpdates } from './hooks/useConflictUpdates';
+import { AdminPanel } from './components/AdminPanel';
 
 function App() {
   const [selectedConflict, setSelectedConflict] = useState<Conflict | null>(null);
@@ -26,6 +28,7 @@ function App() {
   const [showComparison, setShowComparison] = useState(false);
   const [showExport, setShowExport] = useState(false);
   const [showMobileFilters, setShowMobileFilters] = useState(false);
+  const [conflicts, setConflicts] = useState<Conflict[]>(conflictsData as Conflict[]);
   const [filters, setFilters] = useState<FilterState>({
     region: 'All Regions',
     severity: 'All Severities',
@@ -35,6 +38,30 @@ function App() {
 
   const { parseURLState, updateURL, isInitialized, setIsInitialized } = useURLState();
   const isMobile = useIsMobile();
+  
+  const handleConflictUpdate = useCallback((message: any) => {
+    if (message.type === 'conflict:added' && message.data) {
+      setConflicts(prev => [...prev, message.data as Conflict]);
+    } else if (message.type === 'conflict:updated' && message.data) {
+      setConflicts(prev => 
+        prev.map(c => c.id === (message.data as Conflict).id ? message.data as Conflict : c)
+      );
+    } else if (message.type === 'conflict:deleted' && message.data) {
+      setConflicts(prev => prev.filter(c => c.id !== (message.data as { id: string }).id));
+    }
+  }, []);
+  
+  const { isConnected, lastUpdate } = useConflictUpdates(handleConflictUpdate);
+
+  useEffect(() => {
+    fetch('/api/conflicts')
+      .then(res => res.json())
+      .then(data => setConflicts(data))
+      .catch(err => {
+        console.error('Failed to fetch conflicts from API, using fallback data:', err);
+        setConflicts(conflictsData as Conflict[]);
+      });
+  }, []);
 
   useEffect(() => {
     try {
@@ -86,7 +113,7 @@ function App() {
 
   // Filter conflicts based on current filter state
   const filteredConflicts = useMemo(() => {
-    let filtered = conflictsData as Conflict[];
+    let filtered = conflicts;
 
     // Filter by timeline year range
     filtered = filtered.filter((c) => {
@@ -137,7 +164,7 @@ function App() {
     }
 
     return filtered;
-  }, [filters, timelineRange]);
+  }, [filters, timelineRange, conflicts]);
 
   console.log('Filtered conflicts count:', filteredConflicts.length);
 
@@ -306,6 +333,9 @@ function App() {
           </div>
         </div>
       )}
+
+      {/* Admin Panel */}
+      <AdminPanel isConnected={isConnected} lastUpdate={lastUpdate} />
 
       {/* 3D Globe Canvas */}
       {webglSupported ? (
