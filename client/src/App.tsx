@@ -215,10 +215,14 @@ function App() {
             </Suspense>
 
             {/* Camera Controller for animated transitions */}
-            <CameraController conflictCount={filteredConflicts.length} />
+            <CameraController 
+              conflictCount={filteredConflicts.length}
+              timelineRange={timelineRange}
+            />
 
             {/* Camera Controls */}
             <OrbitControls
+              makeDefault
               enablePan={false}
               minDistance={3}
               maxDistance={10}

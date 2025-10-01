@@ -6,22 +6,25 @@ import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
 
 interface CameraControllerProps {
   conflictCount: number;
+  timelineRange: [number, number];
 }
 
-export function CameraController({ conflictCount }: CameraControllerProps) {
+export function CameraController({ conflictCount, timelineRange }: CameraControllerProps) {
   const { camera, controls } = useThree();
-  const prevCountRef = useRef(conflictCount);
+  const prevStateRef = useRef({ count: conflictCount, range: [...timelineRange] as [number, number] });
   const animatingRef = useRef(false);
 
   useEffect(() => {
-    if (!controls || animatingRef.current) return;
+    if (animatingRef.current || !prevStateRef.current.range) return;
     
-    const orbitControls = controls as unknown as OrbitControlsImpl;
+    const orbitControls = controls as unknown as OrbitControlsImpl | null;
+    const hasChanged = prevStateRef.current.count !== conflictCount || 
+                      prevStateRef.current.range[0] !== timelineRange[0] ||
+                      prevStateRef.current.range[1] !== timelineRange[1];
     
-    if (prevCountRef.current !== conflictCount) {
+    if (hasChanged) {
       animatingRef.current = true;
       
-      const currentDistance = camera.position.length();
       const targetDistance = conflictCount === 0 ? 8 : Math.max(4, Math.min(7, 5 + (10 - conflictCount) * 0.2));
       
       const currentPos = camera.position.clone();
@@ -54,9 +57,9 @@ export function CameraController({ conflictCount }: CameraControllerProps) {
         }
       });
       
-      prevCountRef.current = conflictCount;
+      prevStateRef.current = { count: conflictCount, range: [...timelineRange] as [number, number] };
     }
-  }, [conflictCount, camera, controls]);
+  }, [conflictCount, timelineRange, camera, controls]);
 
   return null;
 }
