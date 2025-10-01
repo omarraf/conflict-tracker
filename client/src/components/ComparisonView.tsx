@@ -41,13 +41,13 @@ export function ComparisonView({ conflicts, onRemove, onClose }: ComparisonViewP
   };
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-gray-900/95 backdrop-blur-xl rounded-xl border border-white/10 shadow-2xl w-full max-w-7xl max-h-[90vh] flex flex-col">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-2 md:p-4">
+      <div className="bg-gray-900/95 backdrop-blur-xl rounded-xl border border-white/10 shadow-2xl w-full max-w-7xl max-h-[95vh] md:max-h-[90vh] flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
+        <div className="flex items-center justify-between px-4 py-3 md:px-6 md:py-4 border-b border-white/10">
           <div>
-            <h2 className="text-2xl font-bold text-white">Conflict Comparison</h2>
-            <p className="text-sm text-gray-400 mt-1">
+            <h2 className="text-lg md:text-2xl font-bold text-white">Conflict Comparison</h2>
+            <p className="text-xs md:text-sm text-gray-400 mt-1">
               Comparing {conflicts.length} conflict{conflicts.length !== 1 ? 's' : ''}
             </p>
           </div>
@@ -55,13 +55,13 @@ export function ComparisonView({ conflicts, onRemove, onClose }: ComparisonViewP
             onClick={onClose}
             className="p-2 hover:bg-white/10 rounded-lg transition-colors"
           >
-            <X className="w-6 h-6 text-white" />
+            <X className="w-5 h-5 md:w-6 md:h-6 text-white" />
           </button>
         </div>
 
         {/* Comparison Grid */}
-        <div className="flex-1 overflow-auto p-6">
-          <div className="grid gap-4" style={{ gridTemplateColumns: `repeat(${Math.min(conflicts.length, 3)}, 1fr)` }}>
+        <div className="flex-1 overflow-auto p-3 md:p-6">
+          <div className="grid gap-3 md:gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3" style={{ gridTemplateColumns: conflicts.length === 1 ? '1fr' : undefined }}>
             {conflicts.map((conflict) => (
               <div
                 key={conflict.id}

@@ -1,7 +1,7 @@
 import { Canvas } from '@react-three/fiber';
 import { Suspense, useState, useMemo, useEffect } from 'react';
 import { OrbitControls, Stars } from '@react-three/drei';
-import { GitCompare, Download } from 'lucide-react';
+import { GitCompare, Download, Filter, Menu } from 'lucide-react';
 import '@fontsource/inter';
 
 import { Globe } from './components/Globe';
@@ -16,6 +16,7 @@ import { ExportPanel } from './components/ExportPanel';
 import { Conflict, FilterState } from './types/conflict';
 import conflictsData from './data/conflicts.json';
 import { useURLState } from './hooks/useURLState';
+import { useIsMobile } from './hooks/use-is-mobile';
 
 function App() {
   const [selectedConflict, setSelectedConflict] = useState<Conflict | null>(null);
@@ -24,6 +25,7 @@ function App() {
   const [comparisonConflicts, setComparisonConflicts] = useState<Conflict[]>([]);
   const [showComparison, setShowComparison] = useState(false);
   const [showExport, setShowExport] = useState(false);
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
   const [filters, setFilters] = useState<FilterState>({
     region: 'All Regions',
     severity: 'All Severities',
@@ -32,6 +34,7 @@ function App() {
   });
 
   const { parseURLState, updateURL, isInitialized, setIsInitialized } = useURLState();
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     try {
@@ -165,24 +168,67 @@ function App() {
 
   return (
     <div style={{ width: '100vw', height: '100vh', position: 'relative', overflow: 'hidden' }}>
-      {/* Filter Panel - Fixed Top Left */}
-      <div className="fixed top-6 left-6 z-40 w-80">
-        <FilterPanel
-          filters={filters}
-          onFilterChange={setFilters}
-          conflictCount={filteredConflicts.length}
-        />
-      </div>
+      {/* Filter Panel - Responsive */}
+      {isMobile ? (
+        <>
+          {/* Mobile Filter Button */}
+          <div className="fixed top-4 left-4 z-40">
+            <button
+              onClick={() => setShowMobileFilters(true)}
+              className="bg-gray-900/95 hover:bg-gray-800 backdrop-blur-lg p-3 rounded-lg border border-white/20 shadow-xl transition-all"
+            >
+              <Filter className="w-5 h-5 text-white" />
+            </button>
+          </div>
+          
+          {/* Mobile Filters Modal */}
+          {showMobileFilters && (
+            <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-start justify-center p-4 overflow-y-auto">
+              <div className="bg-gray-900/95 backdrop-blur-xl rounded-xl border border-white/10 shadow-2xl w-full max-w-sm mt-4">
+                <div className="p-4 border-b border-white/10 flex items-center justify-between">
+                  <h2 className="text-lg font-bold text-white">Filters</h2>
+                  <button
+                    onClick={() => setShowMobileFilters(false)}
+                    className="text-white hover:bg-white/10 p-2 rounded transition-colors"
+                  >
+                    ✕
+                  </button>
+                </div>
+                <div className="p-4">
+                  <FilterPanel
+                    filters={filters}
+                    onFilterChange={(newFilters) => {
+                      setFilters(newFilters);
+                      setShowMobileFilters(false);
+                    }}
+                    conflictCount={filteredConflicts.length}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+        </>
+      ) : (
+        <div className="fixed top-6 left-6 z-40 w-80">
+          <FilterPanel
+            filters={filters}
+            onFilterChange={setFilters}
+            conflictCount={filteredConflicts.length}
+          />
+        </div>
+      )}
 
-      {/* App Title - Fixed Top Center */}
-      <div className="fixed top-6 left-1/2 transform -translate-x-1/2 z-30 pointer-events-none">
-        <div className="bg-gray-900/95 backdrop-blur-lg px-6 py-3 rounded-lg border border-white/10 shadow-2xl">
-          <h1 className="text-2xl font-bold text-white text-center">
+      {/* App Title - Responsive */}
+      <div className={`fixed ${isMobile ? 'top-4 left-16 right-4' : 'top-6 left-1/2 transform -translate-x-1/2'} z-30 pointer-events-none`}>
+        <div className="bg-gray-900/95 backdrop-blur-lg px-4 py-2 md:px-6 md:py-3 rounded-lg border border-white/10 shadow-2xl">
+          <h1 className={`${isMobile ? 'text-lg text-left' : 'text-2xl text-center'} font-bold text-white`}>
             Global Conflict Tracker
           </h1>
-          <p className="text-sm text-gray-400 text-center mt-1">
-            Interactive 3D Globe Visualization
-          </p>
+          {!isMobile && (
+            <p className="text-sm text-gray-400 text-center mt-1">
+              Interactive 3D Globe Visualization
+            </p>
+          )}
         </div>
       </div>
 
@@ -194,28 +240,30 @@ function App() {
         isInComparison={selectedConflict ? comparisonConflicts.some((c) => c.id === selectedConflict.id) : false}
       />
 
-      {/* Action Buttons - Fixed Top Right */}
-      <div className="fixed top-6 right-6 z-40 flex gap-3">
+      {/* Action Buttons - Responsive */}
+      <div className={`fixed ${isMobile ? 'top-4 right-4' : 'top-6 right-6'} z-40 flex gap-2`}>
         {comparisonConflicts.length > 0 && (
           <button
             onClick={() => setShowComparison(true)}
-            className="bg-blue-500/90 hover:bg-blue-500 backdrop-blur-lg px-4 py-3 rounded-lg border border-blue-400/30 shadow-xl transition-all hover:scale-105"
+            className="bg-blue-500/90 hover:bg-blue-500 backdrop-blur-lg px-3 py-2 md:px-4 md:py-3 rounded-lg border border-blue-400/30 shadow-xl transition-all hover:scale-105"
           >
             <div className="flex items-center gap-2">
               <GitCompare className="w-5 h-5 text-white" />
-              <span className="text-white font-medium">
-                Compare ({comparisonConflicts.length})
-              </span>
+              {!isMobile && (
+                <span className="text-white font-medium">
+                  Compare ({comparisonConflicts.length})
+                </span>
+              )}
             </div>
           </button>
         )}
         <button
           onClick={() => setShowExport(true)}
-          className="bg-gray-800/90 hover:bg-gray-700 backdrop-blur-lg px-4 py-3 rounded-lg border border-white/20 shadow-xl transition-all hover:scale-105"
+          className="bg-gray-800/90 hover:bg-gray-700 backdrop-blur-lg px-3 py-2 md:px-4 md:py-3 rounded-lg border border-white/20 shadow-xl transition-all hover:scale-105"
         >
           <div className="flex items-center gap-2">
             <Download className="w-5 h-5 text-white" />
-            <span className="text-white font-medium">Export</span>
+            {!isMobile && <span className="text-white font-medium">Export</span>}
           </div>
         </button>
       </div>
@@ -236,8 +284,8 @@ function App() {
         onClose={() => setShowExport(false)}
       />
 
-      {/* Timeline - Fixed Bottom Center */}
-      <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-30 w-[500px]">
+      {/* Timeline - Responsive */}
+      <div className={`fixed ${isMobile ? 'bottom-4 left-4 right-4' : 'bottom-6 left-1/2 transform -translate-x-1/2'} z-30 ${isMobile ? 'w-auto' : 'w-[500px]'}`}>
         <Timeline
           onTimeRangeChange={(start, end) => {
             setTimelineRange([start, end]);
@@ -248,14 +296,16 @@ function App() {
         />
       </div>
 
-      {/* Instructions - Fixed Bottom Right */}
-      <div className="fixed bottom-6 right-6 z-30">
-        <div className="bg-gray-900/90 backdrop-blur-lg px-4 py-2 rounded-lg border border-white/10 shadow-xl">
-          <p className="text-xs text-gray-300 text-center">
-            Click and drag to rotate • Scroll to zoom • Click markers for details
-          </p>
+      {/* Instructions - Hide on Mobile */}
+      {!isMobile && (
+        <div className="fixed bottom-6 right-6 z-30">
+          <div className="bg-gray-900/90 backdrop-blur-lg px-4 py-2 rounded-lg border border-white/10 shadow-xl">
+            <p className="text-xs text-gray-300 text-center">
+              Click and drag to rotate • Scroll to zoom • Click markers for details
+            </p>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* 3D Globe Canvas */}
       {webglSupported ? (
@@ -323,10 +373,14 @@ function App() {
               enablePan={false}
               minDistance={3}
               maxDistance={10}
-              rotateSpeed={0.5}
-              zoomSpeed={0.8}
+              rotateSpeed={isMobile ? 0.7 : 0.5}
+              zoomSpeed={isMobile ? 1.2 : 0.8}
               enableDamping
               dampingFactor={0.05}
+              touches={{
+                ONE: 0,
+                TWO: 1,
+              }}
             />
           </Canvas>
         </ErrorBoundary>
