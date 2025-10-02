@@ -67,6 +67,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
+  app.get("/api/mapbox-token", (req, res) => {
+    res.json({ token: process.env.MAPBOX_ACCESS_TOKEN || '' });
+  });
+
   app.get("/api/conflicts", (req, res) => {
     const conflicts = readConflicts();
     res.json(conflicts);
