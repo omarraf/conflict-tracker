@@ -21,6 +21,7 @@ export function MapboxGlobe({
 }: MapboxGlobeProps) {
   const mapRef = useRef<MapRef>(null);
   const [mapboxToken, setMapboxToken] = useState<string>('');
+  const [mapError, setMapError] = useState<string>('');
 
   useEffect(() => {
     fetch('/api/mapbox-token')
@@ -72,6 +73,21 @@ export function MapboxGlobe({
     );
   }
 
+  if (mapError) {
+    return (
+      <div className="flex items-center justify-center w-full h-full bg-gray-950">
+        <div className="text-white text-center max-w-md px-4">
+          <h3 className="text-lg font-semibold mb-2">Map Loading Issue</h3>
+          <p className="text-sm text-gray-400 mb-2">{mapError}</p>
+          <p className="text-xs text-gray-500">
+            This may be due to browser compatibility or WebGL support. 
+            Try refreshing the page or using a modern browser like Chrome, Firefox, or Safari.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <Map
       ref={mapRef}
@@ -95,6 +111,10 @@ export function MapboxGlobe({
       dragRotate={true}
       touchZoomRotate={true}
       touchPitch={!isMobile}
+      onError={(e) => {
+        console.error('Mapbox error:', e);
+        setMapError(e.error?.message || 'Failed to load map');
+      }}
     >
       {/* Render conflict markers */}
       {conflicts.map((conflict) => (

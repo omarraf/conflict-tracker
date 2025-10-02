@@ -1,6 +1,16 @@
 # Overview
 
-This is an interactive 3D globe visualization application for displaying and analyzing global conflicts. The application presents conflict data on a realistic Earth globe using Three.js/React Three Fiber, allowing users to explore conflicts through an immersive 3D interface with filtering, comparison, and real-time update capabilities.
+This is an interactive 3D globe visualization application for displaying and analyzing global conflicts. The application presents conflict data on a realistic Earth globe using Mapbox GL JS with globe projection, allowing users to explore conflicts through an immersive 3D interface with filtering, comparison, and real-time update capabilities.
+
+# Recent Changes
+
+## October 2025 - Mapbox Migration
+- Replaced Three.js/React Three Fiber globe with Mapbox GL JS for improved performance and responsiveness
+- Implemented secure Mapbox token handling via server-side API endpoint (`/api/mapbox-token`)
+- Created MapboxGlobe component with custom conflict markers, auto-zoom to fit visible conflicts, and mobile-responsive controls
+- Removed unused Three.js components: Globe, ConflictMarker, CameraController, CountryBorders, CountryLabels
+- Cleaned up dependencies by uninstalling @react-three packages
+- Added error handling for WebGL initialization failures with user-friendly fallback message
 
 # User Preferences
 
@@ -13,18 +23,19 @@ Preferred communication style: Simple, everyday language.
 ### Core Technology Stack
 - **React 18** with TypeScript for type-safe component development
 - **Vite** as the build tool and development server with HMR support
-- **React Three Fiber** and **@react-three/drei** for 3D rendering and WebGL-based globe visualization
+- **Mapbox GL JS** with **react-map-gl** for 3D globe visualization and mapping
 - **TailwindCSS** for utility-first styling with custom theme configuration
 - **Radix UI** components for accessible, unstyled UI primitives
-- **GSAP** for smooth animations and camera transitions
+- **GSAP** for smooth animations (used in other UI components)
 
 ### 3D Visualization Layer
-The application uses a WebGL-based 3D globe as the primary interface:
-- Custom Globe component with realistic Earth textures and country borders
-- Dynamic conflict markers positioned using latitude/longitude coordinates converted to 3D vectors
-- Intelligent camera controller that adjusts zoom based on visible conflicts
-- Country labels with priority-based visibility and distance-based scaling
-- GLSL shader support for advanced visual effects
+The application uses Mapbox GL JS with globe projection as the primary interface:
+- MapboxGlobe component with satellite imagery and atmospheric effects (fog, stars, space color)
+- Custom conflict markers positioned using latitude/longitude coordinates
+- Auto-fitting bounds to show all visible conflicts after filter changes
+- Smooth flyTo animations when selecting individual conflicts
+- Mobile-responsive controls with touch gestures support
+- Error handling for WebGL initialization failures
 
 ### State Management
 - Local React state for UI interactions and selections
@@ -79,11 +90,8 @@ The application is configured for **PostgreSQL** via Drizzle ORM:
 ## External Dependencies
 
 ### 3D Rendering & Visualization
-- **@react-three/fiber**: React renderer for Three.js
-- **@react-three/drei**: Helper components for R3F (OrbitControls, Stars, Html)
-- **@react-three/postprocessing**: Visual effects pipeline
-- **three.js**: Core 3D graphics library
-- **vite-plugin-glsl**: GLSL shader compilation support
+- **mapbox-gl**: Mapbox GL JS library for interactive maps and globe visualization
+- **react-map-gl**: React wrapper for Mapbox GL JS with hooks and components
 
 ### UI Component Library
 - **Radix UI**: Complete suite of accessible headless components (Dialog, Dropdown, Select, Tabs, Toast, etc.)
