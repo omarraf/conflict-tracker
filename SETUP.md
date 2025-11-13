@@ -160,6 +160,28 @@ npm start
 2. Run `npm run db:push` to create tables
 3. Restart the server
 
+### Port 5000 Already in Use (macOS)
+
+**Error**: `Error: listen ENOTSUP: operation not supported on socket 0.0.0.0:5000`
+
+**Issue**: On macOS, port 5000 is used by AirPlay Receiver by default.
+
+**Fix** (Option 1 - Recommended):
+- The app now uses port **5001** by default
+- Open http://localhost:5001 instead
+- No other changes needed!
+
+**Fix** (Option 2 - Disable AirPlay):
+1. System Preferences > Sharing
+2. Uncheck "AirPlay Receiver"
+3. Add `PORT=5000` to your `.env` file
+
+**Fix** (Option 3 - Use Custom Port):
+```env
+PORT=3000
+```
+Then open http://localhost:3000
+
 ### No Conflicts Appearing
 
 **Check**:
