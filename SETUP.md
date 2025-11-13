@@ -25,27 +25,24 @@ npm install
 
 2. Fill in your credentials in `.env`:
 
-### Required for Basic Operation:
+### Required:
 
 ```env
 # Mapbox for globe visualization
 MAPBOX_ACCESS_TOKEN=pk.your_mapbox_token_here
-```
 
-### Required for Real-Time Data Updates:
-
-```env
 # PostgreSQL Database (get free from neon.tech)
 DATABASE_URL=postgresql://user:password@host:5432/database
-
-# ACLED API (register at developer.acleddata.com)
-ACLED_API_KEY=your_acled_api_key_here
-ACLED_EMAIL=your_email@example.com
 ```
 
-### Optional for AI Features:
+### Optional (for enhanced data):
 
 ```env
+# ACLED API (register at developer.acleddata.com)
+# The app works WITHOUT this - we use GDELT and RSS feeds by default!
+ACLED_API_KEY=your_acled_api_key_here
+ACLED_EMAIL=your_email@example.com
+
 # OpenAI or Anthropic for AI summaries (future feature)
 OPENAI_API_KEY=sk-your_key_here
 # OR
@@ -83,7 +80,10 @@ npm run db:migrate
 2. Create a new token with default public scopes
 3. Add to `.env` as `MAPBOX_ACCESS_TOKEN`
 
-### ACLED (Required for auto-updates)
+### ACLED (Optional - for enhanced data quality)
+**Note: The app works great without this! We use GDELT and RSS feeds by default.**
+
+If you want to add ACLED as an additional data source:
 1. Visit https://developer.acleddata.com/
 2. Register for a free account
 3. Verify your email
@@ -114,7 +114,10 @@ npm start
 - **Comparison View**: Compare up to 4 conflicts side-by-side
 - **Data Export**: Export filtered data
 - **PostgreSQL Database**: Persistent storage with Drizzle ORM
-- **ACLED Integration**: Automatic daily data updates from ACLED API
+- **Multiple Data Sources**:
+  - **GDELT** (primary, no API key needed): Real-time global events updated every 15 minutes
+  - **RSS Feeds** (backup, no API key needed): Major news sources (Reuters, BBC, Al Jazeera, Crisis Group)
+  - **ACLED** (optional): Academic conflict database for enhanced accuracy
 - **Scheduled Jobs**:
   - Daily full ingestion (last 7 days)
   - Hourly checks for critical updates
@@ -123,7 +126,9 @@ npm start
 ### 🔧 How It Works
 
 1. **Automatic Updates**:
-   - Server runs scheduled jobs to fetch new conflict data from ACLED
+   - Server fetches data from GDELT (real-time global events)
+   - RSS feeds provide additional news coverage
+   - ACLED adds academic data if configured
    - Data is processed, deduplicated, and saved to PostgreSQL
    - Updates are broadcast to all connected clients via WebSocket
 
@@ -134,8 +139,15 @@ npm start
 
 3. **Data Flow**:
    ```
-   ACLED API → Ingestion Service → PostgreSQL → WebSocket → Client
+   GDELT API (no key) ──┐
+   RSS Feeds (no key) ──┼─→ Ingestion Service → PostgreSQL → WebSocket → Client
+   ACLED API (optional) ┘
    ```
+
+4. **Data Sources Explained**:
+   - **GDELT**: Monitors global news in real-time, updates every 15 minutes, completely free
+   - **RSS**: Pulls from trusted news sources (Reuters, BBC, Al Jazeera, Crisis Group)
+   - **ACLED**: Academic database with verified conflict data (optional enhancement)
 
 ## Troubleshooting
 
@@ -152,11 +164,19 @@ npm start
 
 **Check**:
 1. Database has data: Run `npm run db:studio` to open Drizzle Studio
-2. ACLED credentials are valid in `.env`
-3. Run manual ingestion from Admin Panel
-4. Check server logs for errors
+2. Run manual ingestion from Admin Panel (click "Fetch Latest Conflicts")
+3. Check server logs for errors
+4. Verify internet connection (GDELT and RSS feeds require network access)
 
-### ACLED API Errors
+### GDELT/RSS Not Working
+
+**Check**:
+1. Server has internet access
+2. Check server logs for specific errors
+3. Try manual ingestion to see which source is failing
+4. Some corporate firewalls may block external APIs
+
+### ACLED API Errors (if using ACLED)
 
 **Common Issues**:
 - API key not activated (check email for verification)
@@ -164,9 +184,10 @@ npm start
 - Invalid email/key combination
 
 **Fix**:
-1. Verify credentials at https://developer.acleddata.com/
-2. Check server logs for specific error messages
-3. Wait if rate limited (resets daily)
+1. ACLED is optional - app works without it using GDELT and RSS
+2. Verify credentials at https://developer.acleddata.com/
+3. Check server logs for specific error messages
+4. Wait if rate limited (resets daily)
 
 ### WebSocket Not Connecting
 

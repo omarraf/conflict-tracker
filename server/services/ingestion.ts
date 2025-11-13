@@ -4,6 +4,8 @@
  * deduplication, and database updates
  */
 
+import { gdeltService } from './gdelt';
+import { rssService } from './rss';
 import { acledService } from './acled';
 import { storage } from '../storage';
 import type { InsertConflict } from '@shared/schema';
@@ -23,6 +25,7 @@ export class DataIngestionService {
     added: number;
     updated: number;
     errors: number;
+    sources: string[];
   }> {
     console.log(`Starting data ingestion for last ${daysBack} days...`);
 
@@ -30,10 +33,101 @@ export class DataIngestionService {
       added: 0,
       updated: 0,
       errors: 0,
+      sources: [] as string[],
     };
 
     try {
-      // Fetch from ACLED
+      // Try GDELT first (no API key required)
+      await this.ingestFromGDELT(daysBack * 24, results);
+
+      // Try RSS feeds (simple, no API keys)
+      await this.ingestFromRSS(results);
+
+      // Try ACLED if configured
+      if (process.env.ACLED_API_KEY) {
+        await this.ingestFromACLED(daysBack, results);
+      } else {
+        console.log('ACLED not configured, skipping (optional)');
+      }
+
+      console.log('Ingestion complete:', results);
+      return results;
+    } catch (error) {
+      console.error('Error during data ingestion:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Ingest from GDELT (primary source - no API key needed)
+   */
+  private async ingestFromGDELT(hoursBack: number, results: any): Promise<void> {
+    try {
+      console.log(`Fetching from GDELT (last ${hoursBack} hours)...`);
+      const articles = await gdeltService.fetchRecentConflicts(hoursBack);
+
+      if (articles.length === 0) {
+        console.log('No articles from GDELT');
+        return;
+      }
+
+      const conflicts = await gdeltService.transformToConflicts(articles);
+      console.log(`Transformed to ${conflicts.length} conflicts from GDELT`);
+
+      for (const conflict of conflicts) {
+        try {
+          await this.upsertConflict(conflict, results);
+        } catch (error) {
+          console.error(`Error upserting GDELT conflict:`, error);
+          results.errors++;
+        }
+      }
+
+      results.sources.push('GDELT');
+    } catch (error) {
+      console.error('GDELT ingestion failed:', error);
+      results.errors++;
+    }
+  }
+
+  /**
+   * Ingest from RSS feeds (backup source - no API key needed)
+   */
+  private async ingestFromRSS(results: any): Promise<void> {
+    try {
+      console.log('Fetching from RSS feeds...');
+      const articles = await rssService.fetchAllArticles();
+
+      if (articles.length === 0) {
+        console.log('No articles from RSS');
+        return;
+      }
+
+      const conflicts = await rssService.transformToConflicts(articles);
+      console.log(`Transformed to ${conflicts.length} conflicts from RSS`);
+
+      for (const conflict of conflicts) {
+        try {
+          await this.upsertConflict(conflict, results);
+        } catch (error) {
+          console.error(`Error upserting RSS conflict:`, error);
+          results.errors++;
+        }
+      }
+
+      results.sources.push('RSS');
+    } catch (error) {
+      console.error('RSS ingestion failed:', error);
+      results.errors++;
+    }
+  }
+
+  /**
+   * Ingest from ACLED (optional if configured)
+   */
+  private async ingestFromACLED(daysBack: number, results: any): Promise<void> {
+    try {
+      console.log('Fetching from ACLED...');
       const acledEvents = await acledService.fetchRecentEvents(daysBack, 500);
       console.log(`Fetched ${acledEvents.length} events from ACLED`);
 
@@ -53,16 +147,15 @@ export class DataIngestionService {
 
           await this.upsertConflict(aggregated, results);
         } catch (error) {
-          console.error(`Error processing group ${groupKey}:`, error);
+          console.error(`Error processing ACLED group ${groupKey}:`, error);
           results.errors++;
         }
       }
 
-      console.log('Ingestion complete:', results);
-      return results;
+      results.sources.push('ACLED');
     } catch (error) {
-      console.error('Error during data ingestion:', error);
-      throw error;
+      console.error('ACLED ingestion failed:', error);
+      results.errors++;
     }
   }
 
