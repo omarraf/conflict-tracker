@@ -1,4 +1,4 @@
-import { Settings, Wifi, WifiOff } from 'lucide-react';
+import { Settings, Wifi, WifiOff, RefreshCw } from 'lucide-react';
 import { useState } from 'react';
 
 interface AdminPanelProps {
@@ -8,6 +8,26 @@ interface AdminPanelProps {
 
 export function AdminPanel({ isConnected, lastUpdate }: AdminPanelProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [isIngesting, setIsIngesting] = useState(false);
+
+  const handleManualIngest = async () => {
+    setIsIngesting(true);
+    try {
+      const response = await fetch('/api/admin/ingest', { method: 'POST' });
+      const data = await response.json();
+
+      if (response.ok) {
+        alert('Data ingestion started! New conflicts will appear shortly.');
+      } else {
+        alert(`Error: ${data.error || 'Failed to start ingestion'}`);
+      }
+    } catch (error) {
+      alert('Failed to trigger data ingestion');
+      console.error(error);
+    } finally {
+      setTimeout(() => setIsIngesting(false), 3000);
+    }
+  };
 
   if (!isOpen) {
     return (
@@ -69,9 +89,24 @@ export function AdminPanel({ isConnected, lastUpdate }: AdminPanelProps) {
           </div>
         )}
 
+        {/* Manual Ingestion Button */}
+        <button
+          onClick={handleManualIngest}
+          disabled={isIngesting}
+          className="w-full bg-blue-500/20 hover:bg-blue-500/30 disabled:bg-gray-500/20 border border-blue-500/30 rounded-lg p-3 text-white transition-all disabled:cursor-not-allowed"
+        >
+          <div className="flex items-center justify-center gap-2">
+            <RefreshCw className={`w-4 h-4 ${isIngesting ? 'animate-spin' : ''}`} />
+            <span className="text-sm font-medium">
+              {isIngesting ? 'Fetching Data...' : 'Fetch Latest Conflicts'}
+            </span>
+          </div>
+        </button>
+
         {/* Info */}
         <div className="text-xs text-gray-400 pt-2 border-t border-white/10">
           Real-time conflict updates are enabled. Changes will appear automatically.
+          {isConnected && <span className="block mt-1 text-green-400">Automatic updates active</span>}
         </div>
       </div>
     </div>

@@ -1,0 +1,211 @@
+/**
+ * Data Ingestion Service
+ * Coordinates fetching conflict data from multiple sources,
+ * deduplication, and database updates
+ */
+
+import { acledService } from './acled';
+import { storage } from '../storage';
+import type { InsertConflict } from '@shared/schema';
+import { WebSocketServer } from 'ws';
+
+export class DataIngestionService {
+  private wss: WebSocketServer | null = null;
+
+  constructor(wss?: WebSocketServer) {
+    this.wss = wss || null;
+  }
+
+  /**
+   * Ingest recent conflict data from all sources
+   */
+  async ingestRecentData(daysBack: number = 7): Promise<{
+    added: number;
+    updated: number;
+    errors: number;
+  }> {
+    console.log(`Starting data ingestion for last ${daysBack} days...`);
+
+    const results = {
+      added: 0,
+      updated: 0,
+      errors: 0,
+    };
+
+    try {
+      // Fetch from ACLED
+      const acledEvents = await acledService.fetchRecentEvents(daysBack, 500);
+      console.log(`Fetched ${acledEvents.length} events from ACLED`);
+
+      // Group related events to avoid creating too many individual entries
+      const groupedEvents = acledService.groupEvents(acledEvents);
+      console.log(`Grouped into ${groupedEvents.size} conflict clusters`);
+
+      // Process each group
+      for (const [groupKey, events] of groupedEvents) {
+        try {
+          // Use the most recent/severe event as representative
+          const representative = this.selectRepresentativeEvent(events);
+          const conflict = acledService.transformToConflict(representative);
+
+          // Aggregate data from all events in the group
+          const aggregated = this.aggregateEvents(events, conflict);
+
+          await this.upsertConflict(aggregated, results);
+        } catch (error) {
+          console.error(`Error processing group ${groupKey}:`, error);
+          results.errors++;
+        }
+      }
+
+      console.log('Ingestion complete:', results);
+      return results;
+    } catch (error) {
+      console.error('Error during data ingestion:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Select the most significant event from a group to represent it
+   */
+  private selectRepresentativeEvent(events: any[]): any {
+    // Sort by fatalities (descending) and recency
+    return events.sort((a, b) => {
+      if (b.fatalities !== a.fatalities) {
+        return b.fatalities - a.fatalities;
+      }
+      return new Date(b.event_date).getTime() - new Date(a.event_date).getTime();
+    })[0];
+  }
+
+  /**
+   * Aggregate data from multiple events into a single conflict
+   */
+  private aggregateEvents(events: any[], baseConflict: any): InsertConflict {
+    // Sum casualties from all events
+    const totalCasualties = events.reduce((sum, e) => sum + (e.fatalities || 0), 0);
+
+    // Get unique countries
+    const countries = [...new Set(events.map(e => e.country))];
+
+    // Find earliest event date
+    const earliestDate = events.reduce((earliest, e) => {
+      const date = new Date(e.event_date);
+      return date < earliest ? date : earliest;
+    }, new Date(events[0].event_date));
+
+    // Collect all media links
+    const mediaLinks = events.slice(0, 5).map(e => ({
+      type: 'article' as const,
+      url: `https://acleddata.com/data-export-tool/?event_id=${e.event_id_cnty}`,
+      title: `ACLED Event: ${e.event_type} in ${e.location}`,
+    }));
+
+    return {
+      ...baseConflict,
+      casualties: totalCasualties,
+      countries,
+      startDate: earliestDate,
+      mediaLinks,
+      description: `${events.length} related conflict events in this area. ${baseConflict.description}`,
+    };
+  }
+
+  /**
+   * Insert or update a conflict in the database
+   */
+  private async upsertConflict(
+    conflict: InsertConflict,
+    results: { added: number; updated: number }
+  ): Promise<void> {
+    try {
+      // Check if conflict already exists
+      const existing = await storage.getConflict(conflict.id);
+
+      if (existing) {
+        // Update if casualties or other data changed significantly
+        if (this.shouldUpdate(existing, conflict)) {
+          await storage.updateConflict(conflict.id, conflict);
+          results.updated++;
+          console.log(`Updated: ${conflict.name}`);
+
+          // Broadcast update via WebSocket
+          if (this.wss) {
+            this.broadcastUpdate('conflict:updated', conflict);
+          }
+        }
+      } else {
+        // Create new conflict
+        await storage.createConflict(conflict);
+        results.added++;
+        console.log(`Added: ${conflict.name}`);
+
+        // Broadcast addition via WebSocket
+        if (this.wss) {
+          this.broadcastUpdate('conflict:added', conflict);
+        }
+      }
+    } catch (error) {
+      console.error(`Error upserting conflict ${conflict.id}:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Determine if an existing conflict should be updated
+   */
+  private shouldUpdate(existing: any, updated: InsertConflict): boolean {
+    // Update if casualties increased significantly (>10% or >10 people)
+    const casualtyDiff = Math.abs(updated.casualties - existing.casualties);
+    if (casualtyDiff > 10 || casualtyDiff / existing.casualties > 0.1) {
+      return true;
+    }
+
+    // Update if new countries involved
+    if (updated.countries.some(c => !existing.countries.includes(c))) {
+      return true;
+    }
+
+    // Update if severity changed
+    if (updated.severity !== existing.severity) {
+      return true;
+    }
+
+    return false;
+  }
+
+  /**
+   * Broadcast WebSocket update to all connected clients
+   */
+  private broadcastUpdate(type: string, data: any): void {
+    if (!this.wss) return;
+
+    const message = JSON.stringify({
+      type,
+      data,
+      timestamp: new Date().toISOString(),
+    });
+
+    this.wss.clients.forEach((client) => {
+      if (client.readyState === 1) {
+        client.send(message);
+      }
+    });
+  }
+
+  /**
+   * Manually trigger ingestion (useful for testing)
+   */
+  static async runManualIngestion(): Promise<void> {
+    console.log('Running manual data ingestion...');
+    const service = new DataIngestionService();
+    const results = await service.ingestRecentData(7);
+    console.log('Manual ingestion complete:', results);
+  }
+}
+
+// Export singleton instance
+export function createIngestionService(wss: WebSocketServer): DataIngestionService {
+  return new DataIngestionService(wss);
+}
