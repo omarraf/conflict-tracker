@@ -148,12 +148,15 @@
 - ❌ Conflicts older than 3 years (unless ongoing)
 - ❌ Duplicate events from different sources
 
-### **All Conflicts Shown Equally:**
-- No "featured" vs "regular" hierarchy
-- No manual curation (all auto-ingested)
-- Same marker style on map
-- Sorted by recency or severity
-- User can filter by region, severity, date
+### **Dual-Tier Conflict System:**
+- **Curated Conflicts:** 15 manually added major ongoing conflicts (Gaza, Ukraine, Sudan, etc.)
+  - Always shown on map with proper historical dates
+  - Receive auto-updates via smart matching algorithm
+  - Updated recentArticles from auto-ingestion
+- **Auto-Ingested Conflicts:** Auto-discovered conflicts from news sources
+  - If matched to curated conflict: articles appended to curated conflict's "Recent Developments"
+  - If no match found: stored as auto-ingested (NOT shown on map)
+  - Managed via Drizzle Studio for review/deletion
 
 ---
 
