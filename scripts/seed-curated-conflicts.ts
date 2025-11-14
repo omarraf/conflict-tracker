@@ -65,6 +65,7 @@ async function seedCuratedConflicts() {
           mediaLinks: conflict.mediaLinks,
           educationalResources: conflict.educationalResources,
           status: conflict.status,
+          isAutoIngested: false, // Explicitly mark as curated (not auto-ingested)
         };
 
         if (existing) {

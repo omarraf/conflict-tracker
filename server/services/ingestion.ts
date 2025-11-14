@@ -301,9 +301,12 @@ export class DataIngestionService {
       const existing = await storage.getConflict(conflict.id);
 
       if (existing) {
-        // Update existing auto-ingested conflict
+        // Update existing auto-ingested conflict (preserve isAutoIngested flag!)
         if (this.shouldUpdate(existing, conflict)) {
-          await storage.updateConflict(conflict.id, conflict);
+          await storage.updateConflict(conflict.id, {
+            ...conflict,
+            isAutoIngested: true, // Preserve auto-ingested status
+          });
           results.updated++;
           console.log(`Updated auto-ingested: ${conflict.name}`);
 
