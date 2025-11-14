@@ -2,43 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { WebSocketServer } from "ws";
-import fs from "fs";
-import path from "path";
-
-const conflictsPath = path.join(process.cwd(), "server/data/conflicts.json");
-
-if (!fs.existsSync(path.join(process.cwd(), "server/data"))) {
-  fs.mkdirSync(path.join(process.cwd(), "server/data"), { recursive: true });
-}
-
-if (!fs.existsSync(conflictsPath)) {
-  const clientData = path.join(process.cwd(), "client/src/data/conflicts.json");
-  if (fs.existsSync(clientData)) {
-    fs.copyFileSync(clientData, conflictsPath);
-  } else {
-    fs.writeFileSync(conflictsPath, "[]");
-  }
-}
-
-function readConflicts() {
-  try {
-    const data = fs.readFileSync(conflictsPath, "utf-8");
-    return JSON.parse(data);
-  } catch (error) {
-    console.error("Error reading conflicts:", error);
-    return [];
-  }
-}
-
-function writeConflicts(conflicts: any[]) {
-  try {
-    fs.writeFileSync(conflictsPath, JSON.stringify(conflicts, null, 2));
-    return true;
-  } catch (error) {
-    console.error("Error writing conflicts:", error);
-    return false;
-  }
-}
+import { getScheduler } from "./services/scheduler";
 
 function broadcastUpdate(wss: WebSocketServer, type: string, data: any) {
   const message = JSON.stringify({ type, data, timestamp: new Date().toISOString() });
@@ -52,6 +16,15 @@ function broadcastUpdate(wss: WebSocketServer, type: string, data: any) {
 export async function registerRoutes(app: Express): Promise<Server> {
   const httpServer = createServer(app);
   const wss = new WebSocketServer({ server: httpServer, path: "/ws" });
+
+  // Start the scheduler for automatic data updates
+  if (process.env.DATABASE_URL) {
+    console.log('Initializing automatic data ingestion scheduler...');
+    const scheduler = getScheduler(wss);
+    scheduler.start();
+  } else {
+    console.warn('DATABASE_URL not configured - automatic data updates disabled');
+  }
 
   wss.on("connection", (ws) => {
     console.log("WebSocket client connected");
@@ -71,60 +44,95 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ token: process.env.MAPBOX_ACCESS_TOKEN || '' });
   });
 
-  app.get("/api/conflicts", (req, res) => {
-    const conflicts = readConflicts();
-    res.json(conflicts);
-  });
-
-  app.post("/api/conflicts", (req, res) => {
-    const conflicts = readConflicts();
-    const newConflict = {
-      ...req.body,
-      id: `conflict-${Date.now()}`,
-    };
-    
-    conflicts.push(newConflict);
-    
-    if (writeConflicts(conflicts)) {
-      broadcastUpdate(wss, "conflict:added", newConflict);
-      res.status(201).json(newConflict);
-    } else {
-      res.status(500).json({ error: "Failed to save conflict" });
+  app.get("/api/conflicts", async (req, res) => {
+    try {
+      const conflicts = await storage.getConflicts();
+      res.json(conflicts);
+    } catch (error) {
+      console.error("Error fetching conflicts:", error);
+      res.status(500).json({ error: "Failed to fetch conflicts" });
     }
   });
 
-  app.put("/api/conflicts/:id", (req, res) => {
-    const conflicts = readConflicts();
-    const index = conflicts.findIndex((c: any) => c.id === req.params.id);
-    
-    if (index === -1) {
-      return res.status(404).json({ error: "Conflict not found" });
+  app.post("/api/conflicts", async (req, res) => {
+    try {
+      const newConflict = {
+        ...req.body,
+        id: req.body.id || `conflict-${Date.now()}`,
+      };
+
+      const created = await storage.createConflict(newConflict);
+      broadcastUpdate(wss, "conflict:added", created);
+      res.status(201).json(created);
+    } catch (error) {
+      console.error("Error creating conflict:", error);
+      res.status(500).json({ error: "Failed to create conflict" });
     }
-    
-    conflicts[index] = { ...conflicts[index], ...req.body };
-    
-    if (writeConflicts(conflicts)) {
-      broadcastUpdate(wss, "conflict:updated", conflicts[index]);
-      res.json(conflicts[index]);
-    } else {
+  });
+
+  app.put("/api/conflicts/:id", async (req, res) => {
+    try {
+      const updated = await storage.updateConflict(req.params.id, req.body);
+
+      if (!updated) {
+        return res.status(404).json({ error: "Conflict not found" });
+      }
+
+      broadcastUpdate(wss, "conflict:updated", updated);
+      res.json(updated);
+    } catch (error) {
+      console.error("Error updating conflict:", error);
       res.status(500).json({ error: "Failed to update conflict" });
     }
   });
 
-  app.delete("/api/conflicts/:id", (req, res) => {
-    const conflicts = readConflicts();
-    const filteredConflicts = conflicts.filter((c: any) => c.id !== req.params.id);
-    
-    if (conflicts.length === filteredConflicts.length) {
-      return res.status(404).json({ error: "Conflict not found" });
-    }
-    
-    if (writeConflicts(filteredConflicts)) {
+  app.delete("/api/conflicts/:id", async (req, res) => {
+    try {
+      const deleted = await storage.deleteConflict(req.params.id);
+
+      if (!deleted) {
+        return res.status(404).json({ error: "Conflict not found" });
+      }
+
       broadcastUpdate(wss, "conflict:deleted", { id: req.params.id });
       res.json({ success: true });
-    } else {
+    } catch (error) {
+      console.error("Error deleting conflict:", error);
       res.status(500).json({ error: "Failed to delete conflict" });
     }
+  });
+
+  // Admin endpoint to manually trigger data ingestion
+  app.post("/api/admin/ingest", async (req, res) => {
+    try {
+      if (!process.env.DATABASE_URL) {
+        return res.status(503).json({ error: "Database not configured" });
+      }
+
+      const scheduler = getScheduler(wss);
+
+      // Trigger ingestion asynchronously
+      scheduler.triggerManualIngestion().catch(error => {
+        console.error('Manual ingestion error:', error);
+      });
+
+      res.json({
+        message: "Data ingestion started",
+        status: "running"
+      });
+    } catch (error) {
+      console.error("Error triggering ingestion:", error);
+      res.status(500).json({ error: "Failed to trigger ingestion" });
+    }
+  });
+
+  // Health check endpoint
+  app.get("/api/health", (req, res) => {
+    res.json({
+      status: "ok",
+      database: process.env.DATABASE_URL ? "connected" : "not configured",
+      timestamp: new Date().toISOString(),
+    });
   });
 
   return httpServer;
