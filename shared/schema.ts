@@ -38,6 +38,20 @@ export const conflicts = pgTable("conflicts", {
     url: string;
   }[]>(),
   status: text("status").notNull().$type<'active' | 'resolved' | 'ongoing'>(),
+
+  // Recent auto-updated data from news sources
+  recentArticles: jsonb("recent_articles").$type<{
+    url: string;
+    title: string;
+    source: string;
+    publishedAt: string;
+  }[]>().default([]),
+  recentSummary: text("recent_summary"),
+  recentDataUpdated: timestamp("recent_data_updated"),
+
+  // Flag to distinguish curated vs auto-ingested conflicts
+  isAutoIngested: boolean("is_auto_ingested").notNull().default(false),
+
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
@@ -56,6 +70,15 @@ export const insertConflictSchema = createInsertSchema(conflicts, {
     url: z.string(),
   })),
   status: z.enum(['active', 'resolved', 'ongoing']),
+  recentArticles: z.array(z.object({
+    url: z.string(),
+    title: z.string(),
+    source: z.string(),
+    publishedAt: z.string(),
+  })).optional(),
+  recentSummary: z.string().optional(),
+  recentDataUpdated: z.string().or(z.date()).optional(),
+  isAutoIngested: z.boolean().optional(),
 });
 
 export const selectConflictSchema = createSelectSchema(conflicts);

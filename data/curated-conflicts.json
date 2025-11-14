@@ -1,0 +1,602 @@
+[
+  {
+    "id": "gaza-israel-2023",
+    "name": "Gaza-Israel War",
+    "startDate": "2023-10-07T00:00:00Z",
+    "casualties": 45000,
+    "countries": ["Palestine", "Israel"],
+    "region": "Middle East",
+    "severity": "critical",
+    "latitude": 31.5,
+    "longitude": 34.467,
+    "description": "Major military conflict between Israel and Hamas-led Palestinian groups in Gaza. Started with Hamas attacks on October 7, 2023, followed by large-scale Israeli military operations in Gaza. Resulted in massive civilian casualties, displacement of over 1.7 million Palestinians, destruction of infrastructure, and ongoing humanitarian crisis. International calls for ceasefire and concerns about genocide allegations.",
+    "mediaLinks": [
+      {
+        "type": "article",
+        "url": "https://www.aljazeera.com/where/gaza/",
+        "title": "Al Jazeera - Gaza War Coverage"
+      },
+      {
+        "type": "article",
+        "url": "https://www.bbc.com/news/topics/cp7r8vgl2rgt",
+        "title": "BBC - Israel-Gaza War"
+      },
+      {
+        "type": "article",
+        "url": "https://www.reuters.com/world/middle-east/",
+        "title": "Reuters - Middle East Coverage"
+      }
+    ],
+    "educationalResources": [
+      {
+        "title": "UN OCHA - Humanitarian Crisis in Gaza",
+        "url": "https://www.ochaopt.org/"
+      },
+      {
+        "title": "Human Rights Watch - Gaza Reports",
+        "url": "https://www.hrw.org/middle-east/north-africa/israel/palestine"
+      }
+    ],
+    "status": "ongoing"
+  },
+  {
+    "id": "sudan-civil-war-2023",
+    "name": "Sudan Civil War",
+    "startDate": "2023-04-15T00:00:00Z",
+    "casualties": 15000,
+    "countries": ["Sudan"],
+    "region": "Africa",
+    "severity": "critical",
+    "latitude": 15.5007,
+    "longitude": 32.5599,
+    "description": "Armed conflict between the Sudanese Armed Forces (SAF) led by Abdel Fattah al-Burhan and the paramilitary Rapid Support Forces (RSF) led by Mohamed Hamdan Dagalo. Fighting erupted in Khartoum on April 15, 2023, and spread across Sudan. Resulted in massive displacement (over 6 million people), severe humanitarian crisis, ethnic violence in Darfur, and collapse of state institutions.",
+    "mediaLinks": [
+      {
+        "type": "article",
+        "url": "https://www.bbc.com/news/world-africa",
+        "title": "BBC - Sudan Conflict"
+      },
+      {
+        "type": "article",
+        "url": "https://www.aljazeera.com/where/sudan/",
+        "title": "Al Jazeera - Sudan Coverage"
+      },
+      {
+        "type": "article",
+        "url": "https://www.crisisgroup.org/africa/horn-africa/sudan",
+        "title": "Crisis Group - Sudan Analysis"
+      }
+    ],
+    "educationalResources": [
+      {
+        "title": "UN Refugee Agency - Sudan Crisis",
+        "url": "https://www.unhcr.org/sudan-emergency"
+      },
+      {
+        "title": "Amnesty International - Sudan",
+        "url": "https://www.amnesty.org/en/location/africa/east-africa-the-horn-and-great-lakes/sudan/"
+      }
+    ],
+    "status": "ongoing"
+  },
+  {
+    "id": "ukraine-russia-war-2022",
+    "name": "Ukraine-Russia War",
+    "startDate": "2022-02-24T00:00:00Z",
+    "casualties": 200000,
+    "countries": ["Ukraine", "Russia"],
+    "region": "Eastern Europe",
+    "severity": "critical",
+    "latitude": 50.4501,
+    "longitude": 30.5234,
+    "description": "Full-scale invasion of Ukraine by Russia beginning February 24, 2022. Major military conflict involving conventional warfare, missile strikes on civilian infrastructure, naval operations in the Black Sea, and territorial battles in eastern and southern Ukraine. Resulted in massive civilian casualties, displacement of millions of Ukrainians, war crimes allegations, international sanctions on Russia, and ongoing military aid to Ukraine from Western nations.",
+    "mediaLinks": [
+      {
+        "type": "article",
+        "url": "https://www.bbc.com/news/world-europe",
+        "title": "BBC - Ukraine War"
+      },
+      {
+        "type": "article",
+        "url": "https://www.reuters.com/world/europe/",
+        "title": "Reuters - Ukraine Coverage"
+      },
+      {
+        "type": "article",
+        "url": "https://www.kyivpost.com/",
+        "title": "Kyiv Post - Local Coverage"
+      }
+    ],
+    "educationalResources": [
+      {
+        "title": "UN Human Rights - Ukraine",
+        "url": "https://www.ohchr.org/en/countries/ukraine"
+      },
+      {
+        "title": "International Crisis Group - Ukraine",
+        "url": "https://www.crisisgroup.org/europe-central-asia/eastern-europe/ukraine"
+      }
+    ],
+    "status": "ongoing"
+  },
+  {
+    "id": "myanmar-civil-war-2021",
+    "name": "Myanmar Civil War",
+    "startDate": "2021-02-01T00:00:00Z",
+    "casualties": 50000,
+    "countries": ["Myanmar"],
+    "region": "Asia",
+    "severity": "high",
+    "latitude": 21.9162,
+    "longitude": 95.956,
+    "description": "Armed conflict following the military coup d'état on February 1, 2021, that overthrew the democratically elected government. Military junta faces resistance from ethnic armed organizations, People's Defense Forces, and civil disobedience movement. Widespread human rights violations, mass arrests, torture, airstrikes on civilians, and displacement of over 1 million people.",
+    "mediaLinks": [
+      {
+        "type": "article",
+        "url": "https://www.irrawaddy.com/",
+        "title": "The Irrawaddy - Independent Myanmar News"
+      },
+      {
+        "type": "article",
+        "url": "https://www.bbc.com/news/world-asia",
+        "title": "BBC - Myanmar Coverage"
+      },
+      {
+        "type": "article",
+        "url": "https://www.crisisgroup.org/asia/south-east-asia/myanmar",
+        "title": "Crisis Group - Myanmar"
+      }
+    ],
+    "educationalResources": [
+      {
+        "title": "UN Human Rights - Myanmar",
+        "url": "https://www.ohchr.org/en/countries/myanmar"
+      },
+      {
+        "title": "Human Rights Watch - Myanmar",
+        "url": "https://www.hrw.org/asia/myanmar"
+      }
+    ],
+    "status": "ongoing"
+  },
+  {
+    "id": "syria-civil-war-2011",
+    "name": "Syrian Civil War",
+    "startDate": "2011-03-15T00:00:00Z",
+    "casualties": 600000,
+    "countries": ["Syria"],
+    "region": "Middle East",
+    "severity": "critical",
+    "latitude": 33.5138,
+    "longitude": 36.2765,
+    "description": "Prolonged armed conflict beginning as protests during the Arab Spring in March 2011. Evolved into multi-sided civil war involving Syrian government, opposition forces, Kurdish groups, Islamic State, and foreign interventions (Russia, Turkey, US, Iran). Over 13 million displaced, chemical weapons attacks, humanitarian catastrophe, and ongoing instability despite reduced violence in recent years.",
+    "mediaLinks": [
+      {
+        "type": "article",
+        "url": "https://www.bbc.com/news/world-middle-east",
+        "title": "BBC - Syria Conflict"
+      },
+      {
+        "type": "article",
+        "url": "https://www.aljazeera.com/where/syria/",
+        "title": "Al Jazeera - Syria Coverage"
+      },
+      {
+        "type": "article",
+        "url": "https://www.crisisgroup.org/middle-east-north-africa/eastern-mediterranean/syria",
+        "title": "Crisis Group - Syria"
+      }
+    ],
+    "educationalResources": [
+      {
+        "title": "UN Syria Response",
+        "url": "https://www.unocha.org/syria"
+      },
+      {
+        "title": "Syrian Observatory for Human Rights",
+        "url": "https://www.syriahr.com/en/"
+      }
+    ],
+    "status": "ongoing"
+  },
+  {
+    "id": "yemen-civil-war-2014",
+    "name": "Yemen Civil War",
+    "startDate": "2014-09-21T00:00:00Z",
+    "casualties": 380000,
+    "countries": ["Yemen", "Saudi Arabia"],
+    "region": "Middle East",
+    "severity": "critical",
+    "latitude": 15.5527,
+    "longitude": 48.5164,
+    "description": "Ongoing multi-sided conflict primarily between Houthi movement and Yemeni government, with Saudi-led coalition intervention starting in 2015. World's worst humanitarian crisis with millions facing famine, cholera outbreaks, destroyed infrastructure, and blockades preventing aid delivery. Recent ceasefire efforts show limited progress.",
+    "mediaLinks": [
+      {
+        "type": "article",
+        "url": "https://www.aljazeera.com/where/yemen/",
+        "title": "Al Jazeera - Yemen Coverage"
+      },
+      {
+        "type": "article",
+        "url": "https://www.bbc.com/news/world-middle-east",
+        "title": "BBC - Yemen Crisis"
+      },
+      {
+        "type": "article",
+        "url": "https://www.crisisgroup.org/middle-east-north-africa/gulf-and-arabian-peninsula/yemen",
+        "title": "Crisis Group - Yemen"
+      }
+    ],
+    "educationalResources": [
+      {
+        "title": "UN Yemen Humanitarian Response",
+        "url": "https://www.unocha.org/yemen"
+      },
+      {
+        "title": "Yemen Data Project",
+        "url": "https://yemendataproject.org/"
+      }
+    ],
+    "status": "ongoing"
+  },
+  {
+    "id": "ethiopia-tigray-war-2020",
+    "name": "Tigray War",
+    "startDate": "2020-11-04T00:00:00Z",
+    "casualties": 600000,
+    "countries": ["Ethiopia"],
+    "region": "Africa",
+    "severity": "high",
+    "latitude": 14.0,
+    "longitude": 38.0,
+    "description": "Armed conflict between Ethiopian federal government allied with Eritrea against Tigray People's Liberation Front (TPLF). Characterized by mass atrocities, ethnic cleansing, widespread sexual violence, man-made famine, and communications blackout. Ceasefire agreement signed November 2022, but humanitarian crisis continues with limited access to aid.",
+    "mediaLinks": [
+      {
+        "type": "article",
+        "url": "https://www.bbc.com/news/topics/c9wpw196871t",
+        "title": "BBC - Tigray Conflict"
+      },
+      {
+        "type": "article",
+        "url": "https://www.aljazeera.com/where/ethiopia/",
+        "title": "Al Jazeera - Ethiopia Coverage"
+      },
+      {
+        "type": "article",
+        "url": "https://www.crisisgroup.org/africa/horn-africa/ethiopia",
+        "title": "Crisis Group - Ethiopia"
+      }
+    ],
+    "educationalResources": [
+      {
+        "title": "Amnesty International - Tigray",
+        "url": "https://www.amnesty.org/en/location/africa/east-africa-the-horn-and-great-lakes/ethiopia/"
+      },
+      {
+        "title": "Human Rights Watch - Ethiopia",
+        "url": "https://www.hrw.org/africa/ethiopia"
+      }
+    ],
+    "status": "ongoing"
+  },
+  {
+    "id": "afghanistan-taliban-2021",
+    "name": "Afghanistan Taliban Rule & Resistance",
+    "startDate": "2021-08-15T00:00:00Z",
+    "casualties": 25000,
+    "countries": ["Afghanistan"],
+    "region": "Asia",
+    "severity": "high",
+    "latitude": 34.5553,
+    "longitude": 69.2075,
+    "description": "Taliban takeover following US withdrawal in August 2021. Ongoing insurgency by Islamic State Khorasan Province (ISIS-K) and National Resistance Front. Severe humanitarian crisis, economic collapse, women's rights violations, ethnic persecution, and international isolation of Taliban government.",
+    "mediaLinks": [
+      {
+        "type": "article",
+        "url": "https://www.bbc.com/news/world-asia",
+        "title": "BBC - Afghanistan"
+      },
+      {
+        "type": "article",
+        "url": "https://www.aljazeera.com/where/afghanistan/",
+        "title": "Al Jazeera - Afghanistan Coverage"
+      },
+      {
+        "type": "article",
+        "url": "https://www.crisisgroup.org/asia/south-asia/afghanistan",
+        "title": "Crisis Group - Afghanistan"
+      }
+    ],
+    "educationalResources": [
+      {
+        "title": "UN Assistance Mission in Afghanistan",
+        "url": "https://unama.unmissions.org/"
+      },
+      {
+        "title": "Human Rights Watch - Afghanistan",
+        "url": "https://www.hrw.org/asia/afghanistan"
+      }
+    ],
+    "status": "ongoing"
+  },
+  {
+    "id": "sahel-insurgency-2012",
+    "name": "Sahel Insurgency",
+    "startDate": "2012-01-16T00:00:00Z",
+    "casualties": 50000,
+    "countries": ["Mali", "Burkina Faso", "Niger", "Chad"],
+    "region": "Africa",
+    "severity": "high",
+    "latitude": 17.5707,
+    "longitude": 3.9962,
+    "description": "Ongoing jihadist insurgency across Sahel region involving Al-Qaeda affiliates (JNIM) and Islamic State groups. Spread from northern Mali to Burkina Faso, Niger, and parts of other West African countries. Caused massive displacement, humanitarian crisis, military coups, and withdrawal of French forces. Regional instability continues with increasing civilian casualties.",
+    "mediaLinks": [
+      {
+        "type": "article",
+        "url": "https://www.bbc.com/news/world-africa",
+        "title": "BBC - Sahel Coverage"
+      },
+      {
+        "type": "article",
+        "url": "https://www.crisisgroup.org/africa/sahel",
+        "title": "Crisis Group - Sahel"
+      },
+      {
+        "type": "article",
+        "url": "https://www.aljazeera.com/where/mali/",
+        "title": "Al Jazeera - Sahel Region"
+      }
+    ],
+    "educationalResources": [
+      {
+        "title": "UN Office for West Africa and the Sahel",
+        "url": "https://unowas.unmissions.org/"
+      },
+      {
+        "title": "Armed Conflict Location & Event Data Project",
+        "url": "https://acleddata.com/dashboard/#/dashboard"
+      }
+    ],
+    "status": "ongoing"
+  },
+  {
+    "id": "drc-conflicts-ongoing",
+    "name": "Democratic Republic of Congo Conflicts",
+    "startDate": "2022-03-01T00:00:00Z",
+    "casualties": 30000,
+    "countries": ["Democratic Republic of Congo"],
+    "region": "Africa",
+    "severity": "high",
+    "latitude": -4.0383,
+    "longitude": 21.7587,
+    "description": "Ongoing armed conflicts in eastern DRC involving various rebel groups including M23, ADF, and militia forces. Fighting between M23 rebels and government forces intensified in 2022. Caused massive displacement (over 6 million internally displaced), sexual violence, child soldier recruitment, and resource exploitation. Regional tensions with Rwanda and Uganda involvement.",
+    "mediaLinks": [
+      {
+        "type": "article",
+        "url": "https://www.bbc.com/news/world-africa",
+        "title": "BBC - DR Congo"
+      },
+      {
+        "type": "article",
+        "url": "https://www.aljazeera.com/where/dr-congo/",
+        "title": "Al Jazeera - DRC Coverage"
+      },
+      {
+        "type": "article",
+        "url": "https://www.crisisgroup.org/africa/central-africa/democratic-republic-congo",
+        "title": "Crisis Group - DRC"
+      }
+    ],
+    "educationalResources": [
+      {
+        "title": "UN Peacekeeping in DRC (MONUSCO)",
+        "url": "https://monusco.unmissions.org/"
+      },
+      {
+        "title": "Human Rights Watch - DRC",
+        "url": "https://www.hrw.org/africa/democratic-republic-congo"
+      }
+    ],
+    "status": "ongoing"
+  },
+  {
+    "id": "somalia-al-shabaab-ongoing",
+    "name": "Somalia Civil War & Al-Shabaab Insurgency",
+    "startDate": "2006-12-01T00:00:00Z",
+    "casualties": 40000,
+    "countries": ["Somalia"],
+    "region": "Africa",
+    "severity": "high",
+    "latitude": 2.0469,
+    "longitude": 45.3182,
+    "description": "Long-running conflict between Somali government (backed by African Union forces) and Al-Shabaab militant group. Despite territorial losses, Al-Shabaab continues asymmetric warfare, suicide bombings, assassinations, and controls rural areas. Ongoing humanitarian crisis with famine, drought, and displacement affecting millions. Recent government offensive shows mixed results.",
+    "mediaLinks": [
+      {
+        "type": "article",
+        "url": "https://www.bbc.com/news/world-africa",
+        "title": "BBC - Somalia"
+      },
+      {
+        "type": "article",
+        "url": "https://www.aljazeera.com/where/somalia/",
+        "title": "Al Jazeera - Somalia Coverage"
+      },
+      {
+        "type": "article",
+        "url": "https://www.crisisgroup.org/africa/horn-africa/somalia",
+        "title": "Crisis Group - Somalia"
+      }
+    ],
+    "educationalResources": [
+      {
+        "title": "UN Assistance Mission in Somalia",
+        "url": "https://unsom.unmissions.org/"
+      },
+      {
+        "title": "Human Rights Watch - Somalia",
+        "url": "https://www.hrw.org/africa/somalia"
+      }
+    ],
+    "status": "ongoing"
+  },
+  {
+    "id": "nagorno-karabakh-2023",
+    "name": "Nagorno-Karabakh Conflict",
+    "startDate": "2023-09-19T00:00:00Z",
+    "casualties": 500,
+    "countries": ["Azerbaijan", "Armenia"],
+    "region": "Asia",
+    "severity": "medium",
+    "latitude": 39.8282,
+    "longitude": 46.7631,
+    "description": "Azerbaijan's military operation in September 2023 led to dissolution of the self-proclaimed Republic of Artsakh and mass exodus of ethnic Armenians from Nagorno-Karabakh. Follows 2020 war between Armenia and Azerbaijan. Resulted in complete Azerbaijani control of the region, displacement of over 100,000 ethnic Armenians, and ongoing humanitarian concerns.",
+    "mediaLinks": [
+      {
+        "type": "article",
+        "url": "https://www.bbc.com/news/world-europe",
+        "title": "BBC - Nagorno-Karabakh"
+      },
+      {
+        "type": "article",
+        "url": "https://www.aljazeera.com/tag/nagorno-karabakh/",
+        "title": "Al Jazeera - Nagorno-Karabakh Coverage"
+      },
+      {
+        "type": "article",
+        "url": "https://www.crisisgroup.org/europe-central-asia/caucasus/nagorno-karabakh-conflict",
+        "title": "Crisis Group - Nagorno-Karabakh"
+      }
+    ],
+    "educationalResources": [
+      {
+        "title": "Human Rights Watch - Armenia/Azerbaijan",
+        "url": "https://www.hrw.org/europe/central-asia/armenia"
+      },
+      {
+        "title": "International Crisis Group Analysis",
+        "url": "https://www.crisisgroup.org/content/nagorno-karabakh-conflict"
+      }
+    ],
+    "status": "resolved"
+  },
+  {
+    "id": "pakistan-militant-insurgency",
+    "name": "Pakistan Militant Insurgency",
+    "startDate": "2020-01-01T00:00:00Z",
+    "casualties": 15000,
+    "countries": ["Pakistan"],
+    "region": "Asia",
+    "severity": "medium",
+    "latitude": 33.6844,
+    "longitude": 73.0479,
+    "description": "Ongoing violence from Tehrik-i-Taliban Pakistan (TTP) and other militant groups, particularly in Khyber Pakhtunkhwa and Balochistan provinces. Increased attacks on security forces, sectarian violence, and ethnic tensions. Baloch separatist insurgency continues with attacks on infrastructure and Chinese Belt and Road projects.",
+    "mediaLinks": [
+      {
+        "type": "article",
+        "url": "https://www.dawn.com/",
+        "title": "Dawn - Pakistan News"
+      },
+      {
+        "type": "article",
+        "url": "https://www.bbc.com/news/world-asia",
+        "title": "BBC - Pakistan"
+      },
+      {
+        "type": "article",
+        "url": "https://www.aljazeera.com/where/pakistan/",
+        "title": "Al Jazeera - Pakistan Coverage"
+      }
+    ],
+    "educationalResources": [
+      {
+        "title": "Human Rights Watch - Pakistan",
+        "url": "https://www.hrw.org/asia/pakistan"
+      },
+      {
+        "title": "South Asia Terrorism Portal",
+        "url": "https://www.satp.org/satporgtp/countries/pakistan/index.html"
+      }
+    ],
+    "status": "ongoing"
+  },
+  {
+    "id": "colombia-armed-conflict",
+    "name": "Colombian Armed Conflict",
+    "startDate": "2016-01-01T00:00:00Z",
+    "casualties": 12000,
+    "countries": ["Colombia"],
+    "region": "South America",
+    "severity": "medium",
+    "latitude": 4.711,
+    "longitude": -74.0721,
+    "description": "Ongoing violence despite 2016 FARC peace agreement. Dissident FARC factions, ELN guerrillas, and criminal gangs continue operating. Drug trafficking, illegal mining, forced displacement, and violence against social leaders persist. Government peace talks with ELN show limited progress. Rural areas remain affected by armed group presence.",
+    "mediaLinks": [
+      {
+        "type": "article",
+        "url": "https://www.bbc.com/news/world-latin-america",
+        "title": "BBC - Colombia"
+      },
+      {
+        "type": "article",
+        "url": "https://colombiareports.com/",
+        "title": "Colombia Reports"
+      },
+      {
+        "type": "article",
+        "url": "https://www.crisisgroup.org/latin-america-caribbean/andes/colombia",
+        "title": "Crisis Group - Colombia"
+      }
+    ],
+    "educationalResources": [
+      {
+        "title": "UN Verification Mission in Colombia",
+        "url": "https://colombia.unmissions.org/"
+      },
+      {
+        "title": "Human Rights Watch - Colombia",
+        "url": "https://www.hrw.org/americas/colombia"
+      }
+    ],
+    "status": "ongoing"
+  },
+  {
+    "id": "cameroon-anglophone-crisis",
+    "name": "Cameroon Anglophone Crisis",
+    "startDate": "2017-10-01T00:00:00Z",
+    "casualties": 6000,
+    "countries": ["Cameroon"],
+    "region": "Africa",
+    "severity": "medium",
+    "latitude": 5.9631,
+    "longitude": 10.1591,
+    "description": "Armed conflict between Cameroonian military and Anglophone separatist groups in Northwest and Southwest regions. Started as protests against marginalization of English-speaking minority, escalated to armed insurgency. Characterized by attacks on schools, kidnappings, village burnings, and over 700,000 displaced. Limited progress in peace negotiations.",
+    "mediaLinks": [
+      {
+        "type": "article",
+        "url": "https://www.bbc.com/news/topics/cy4p8zpl72et",
+        "title": "BBC - Cameroon"
+      },
+      {
+        "type": "article",
+        "url": "https://www.crisisgroup.org/africa/central-africa/cameroon",
+        "title": "Crisis Group - Cameroon"
+      },
+      {
+        "type": "article",
+        "url": "https://www.aljazeera.com/where/cameroon/",
+        "title": "Al Jazeera - Cameroon"
+      }
+    ],
+    "educationalResources": [
+      {
+        "title": "Human Rights Watch - Cameroon",
+        "url": "https://www.hrw.org/africa/cameroon"
+      },
+      {
+        "title": "Amnesty International - Cameroon",
+        "url": "https://www.amnesty.org/en/location/africa/west-and-central-africa/cameroon/"
+      }
+    ],
+    "status": "ongoing"
+  }
+]

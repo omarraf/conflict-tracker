@@ -1,23 +1,19 @@
-import { useState, useMemo, useEffect, useCallback } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { GitCompare, Download, Filter, Menu } from 'lucide-react';
 import '@fontsource/inter';
 
 import { MapboxGlobe } from './components/MapboxGlobe';
 import { ConflictSidebar } from './components/ConflictSidebar';
 import { FilterPanel } from './components/FilterPanel';
-import { Timeline } from './components/Timeline';
 import { ComparisonView } from './components/ComparisonView';
 import { ExportPanel } from './components/ExportPanel';
 import { Conflict, FilterState } from './types/conflict';
 import conflictsData from './data/conflicts.json';
 import { useURLState } from './hooks/useURLState';
 import { useIsMobile } from './hooks/use-is-mobile';
-import { useConflictUpdates } from './hooks/useConflictUpdates';
-import { AdminPanel } from './components/AdminPanel';
 
 function App() {
   const [selectedConflict, setSelectedConflict] = useState<Conflict | null>(null);
-  const [timelineRange, setTimelineRange] = useState<[number, number]>([1989, 2025]);
   const [comparisonConflicts, setComparisonConflicts] = useState<Conflict[]>([]);
   const [showComparison, setShowComparison] = useState(false);
   const [showExport, setShowExport] = useState(false);
@@ -32,20 +28,6 @@ function App() {
 
   const { parseURLState, updateURL, isInitialized, setIsInitialized } = useURLState();
   const isMobile = useIsMobile();
-  
-  const handleConflictUpdate = useCallback((message: any) => {
-    if (message.type === 'conflict:added' && message.data) {
-      setConflicts(prev => [...prev, message.data as Conflict]);
-    } else if (message.type === 'conflict:updated' && message.data) {
-      setConflicts(prev => 
-        prev.map(c => c.id === (message.data as Conflict).id ? message.data as Conflict : c)
-      );
-    } else if (message.type === 'conflict:deleted' && message.data) {
-      setConflicts(prev => prev.filter(c => c.id !== (message.data as { id: string }).id));
-    }
-  }, []);
-  
-  const { isConnected, lastUpdate } = useConflictUpdates(handleConflictUpdate);
 
   useEffect(() => {
     fetch('/api/conflicts')
@@ -63,28 +45,23 @@ function App() {
       if (urlState.filters) {
         setFilters(urlState.filters);
       }
-      if (urlState.timelineRange) {
-        setTimelineRange(urlState.timelineRange);
-      }
       setIsInitialized(true);
     }
   }, [isInitialized, parseURLState, setIsInitialized]);
 
   useEffect(() => {
     if (isInitialized) {
-      updateURL(filters, timelineRange);
+      updateURL(filters);
     }
-  }, [filters, timelineRange, isInitialized, updateURL]);
+  }, [filters, isInitialized, updateURL]);
 
   // Filter conflicts based on current filter state
   const filteredConflicts = useMemo(() => {
     let filtered = conflicts;
 
-    // Filter by timeline year range
-    filtered = filtered.filter((c) => {
-      const startYear = new Date(c.startDate).getFullYear();
-      return startYear >= timelineRange[0] && startYear <= timelineRange[1];
-    });
+    // IMPORTANT: Hide auto-ingested conflicts (pending review) from map
+    // Only show manually curated conflicts
+    filtered = filtered.filter((c) => !c.isAutoIngested);
 
     // Filter by region
     if (filters.region !== 'All Regions') {
@@ -129,7 +106,7 @@ function App() {
     }
 
     return filtered;
-  }, [filters, timelineRange, conflicts]);
+  }, [filters, conflicts]);
 
   console.log('Filtered conflicts count:', filteredConflicts.length);
 
@@ -276,18 +253,6 @@ function App() {
         onClose={() => setShowExport(false)}
       />
 
-      {/* Timeline - Responsive */}
-      <div className={`fixed ${isMobile ? 'bottom-4 left-4 right-4' : 'bottom-6 left-1/2 transform -translate-x-1/2'} z-30 ${isMobile ? 'w-auto' : 'w-[500px]'}`}>
-        <Timeline
-          onTimeRangeChange={(start, end) => {
-            setTimelineRange([start, end]);
-            setFilters(prev => ({ ...prev, timeline: 'All Time' }));
-          }}
-          minYear={1989}
-          maxYear={2025}
-        />
-      </div>
-
       {/* Instructions - Hide on Mobile */}
       {!isMobile && (
         <div className="fixed bottom-6 right-6 z-30">
@@ -298,9 +263,6 @@ function App() {
           </div>
         </div>
       )}
-
-      {/* Admin Panel */}
-      <AdminPanel isConnected={isConnected} lastUpdate={lastUpdate} />
 
       {/* Mapbox Globe */}
       <div className="absolute inset-0 w-full h-full">

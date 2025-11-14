@@ -3,7 +3,6 @@ import { FilterState } from '../types/conflict';
 
 interface URLStateParams {
   filters: FilterState;
-  timelineRange: [number, number];
 }
 
 export function useURLState() {
@@ -17,8 +16,6 @@ export function useURLState() {
     const severity = params.get('severity');
     const timeline = params.get('timeline');
     const searchQuery = params.get('search');
-    const startYear = params.get('startYear');
-    const endYear = params.get('endYear');
 
     if (region || severity || timeline || searchQuery) {
       state.filters = {
@@ -29,14 +26,10 @@ export function useURLState() {
       };
     }
 
-    if (startYear && endYear) {
-      state.timelineRange = [parseInt(startYear), parseInt(endYear)];
-    }
-
     return state;
   }, []);
 
-  const updateURL = useCallback((filters: FilterState, timelineRange: [number, number]) => {
+  const updateURL = useCallback((filters: FilterState) => {
     const params = new URLSearchParams();
 
     if (filters.region !== 'All Regions') {
@@ -50,10 +43,6 @@ export function useURLState() {
     }
     if (filters.searchQuery) {
       params.set('search', filters.searchQuery);
-    }
-    if (timelineRange[0] !== 1989 || timelineRange[1] !== 2025) {
-      params.set('startYear', timelineRange[0].toString());
-      params.set('endYear', timelineRange[1].toString());
     }
 
     const newURL = params.toString()
