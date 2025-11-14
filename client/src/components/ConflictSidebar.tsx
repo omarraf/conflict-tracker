@@ -1,4 +1,4 @@
-import { X, Calendar, Users, MapPin, ExternalLink, BookOpen, TrendingUp, GitCompare } from 'lucide-react';
+import { X, Calendar, Users, MapPin, ExternalLink, BookOpen, TrendingUp, GitCompare, Newspaper, Clock } from 'lucide-react';
 import { Conflict } from '../types/conflict';
 import { formatNumber, getYearsSince } from '../lib/coordinates';
 import { Button } from './ui/button';
@@ -120,11 +120,82 @@ export function ConflictSidebar({ conflict, onClose, onCompare, isInComparison }
 
           {/* Description */}
           <div className="mb-6">
-            <h3 className="text-sm font-medium text-gray-400 mb-2">Description</h3>
+            <h3 className="text-sm font-medium text-gray-400 mb-2">Overview</h3>
             <p className="text-sm leading-relaxed text-gray-200">
               {conflict.description}
             </p>
           </div>
+
+          {/* Recent Articles */}
+          {conflict.recentArticles && conflict.recentArticles.length > 0 && (
+            <>
+              <Separator className="bg-white/10 mb-6" />
+              <div className="mb-6">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2 text-gray-400">
+                    <Newspaper className="h-4 w-4" />
+                    <span className="text-sm font-medium">Recent Developments</span>
+                  </div>
+                  {conflict.recentDataUpdated && (
+                    <div className="flex items-center gap-1 text-xs text-gray-500">
+                      <Clock className="h-3 w-3" />
+                      <span>
+                        {new Date(conflict.recentDataUpdated).toLocaleDateString('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                        })}
+                      </span>
+                    </div>
+                  )}
+                </div>
+
+                {conflict.recentSummary && (
+                  <div className="bg-purple-500/10 border border-purple-500/20 rounded-lg p-3 mb-3">
+                    <p className="text-sm text-purple-200 leading-relaxed">
+                      {conflict.recentSummary}
+                    </p>
+                  </div>
+                )}
+
+                <div className="space-y-2">
+                  <div className="text-xs text-gray-400 mb-2">Latest Articles (Last 7 Days)</div>
+                  {conflict.recentArticles.slice(0, 5).map((article, index) => (
+                    <a
+                      key={index}
+                      href={article.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="block bg-white/5 hover:bg-white/10 rounded-lg p-3 border border-white/10 transition-colors"
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex-1 min-w-0">
+                          <div className="text-sm font-medium text-white line-clamp-2">
+                            {article.title}
+                          </div>
+                          <div className="flex items-center gap-2 mt-1">
+                            <span className="text-xs text-gray-400">{article.source}</span>
+                            <span className="text-xs text-gray-500">•</span>
+                            <span className="text-xs text-gray-500">
+                              {new Date(article.publishedAt).toLocaleDateString('en-US', {
+                                month: 'short',
+                                day: 'numeric',
+                              })}
+                            </span>
+                          </div>
+                        </div>
+                        <ExternalLink className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                      </div>
+                    </a>
+                  ))}
+                  {conflict.recentArticles.length > 5 && (
+                    <div className="text-xs text-gray-500 text-center pt-2">
+                      +{conflict.recentArticles.length - 5} more articles
+                    </div>
+                  )}
+                </div>
+              </div>
+            </>
+          )}
 
           <Separator className="bg-white/10 mb-6" />
 

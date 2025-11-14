@@ -8,10 +8,15 @@ import { gdeltService } from './gdelt';
 import { rssService } from './rss';
 import { acledService } from './acled';
 import { storage } from '../storage';
-import type { InsertConflict } from '@shared/schema';
+import type { InsertConflict, Conflict } from '@shared/schema';
 import { WebSocketServer } from 'ws';
 import { readFile } from 'fs/promises';
 import { join } from 'path';
+import {
+  findMatchingCuratedConflict,
+  isDuplicateArticle,
+  filterRecentArticles
+} from './matching';
 
 // List of curated conflict IDs that should not be auto-updated
 let curatedConflictIds: Set<string> = new Set();
@@ -228,27 +233,79 @@ export class DataIngestionService {
 
   /**
    * Insert or update a conflict in the database
+   * NEW: Tries to match auto-ingested conflicts to curated ones and append recent articles
    */
   private async upsertConflict(
     conflict: InsertConflict,
     results: { added: number; updated: number }
   ): Promise<void> {
     try {
-      // Check if conflict already exists
+      // Get all conflicts for matching
+      const allConflicts = await storage.getConflicts();
+
+      // Try to find a matching curated conflict
+      const matchingCurated = findMatchingCuratedConflict(
+        {
+          name: conflict.name,
+          latitude: conflict.latitude,
+          longitude: conflict.longitude,
+          countries: conflict.countries,
+        },
+        allConflicts
+      );
+
+      if (matchingCurated) {
+        // Found a match! Append recent article instead of creating new conflict
+        console.log(`📰 Matched to curated conflict: ${matchingCurated.name}`);
+
+        // Extract article from auto-ingested conflict
+        const newArticle = {
+          url: conflict.mediaLinks[0]?.url || '',
+          title: conflict.mediaLinks[0]?.title || conflict.name,
+          source: this.extractSource(conflict.mediaLinks[0]?.url || ''),
+          publishedAt: new Date().toISOString(),
+        };
+
+        // Get existing recent articles or initialize empty array
+        const existingArticles = matchingCurated.recentArticles || [];
+
+        // Check if article already exists (prevent duplicates)
+        if (!isDuplicateArticle(newArticle, existingArticles)) {
+          // Add new article to recent articles
+          const updatedArticles = [...existingArticles, newArticle];
+
+          // Keep only last 7 days of articles
+          const filteredArticles = filterRecentArticles(updatedArticles);
+
+          // Update the curated conflict with new recent article
+          await storage.updateConflict(matchingCurated.id, {
+            recentArticles: filteredArticles,
+            recentDataUpdated: new Date(),
+          });
+
+          results.updated++;
+          console.log(`   ✅ Added recent article to: ${matchingCurated.name}`);
+
+          // Broadcast update via WebSocket
+          if (this.wss) {
+            this.broadcastUpdate('conflict:updated', matchingCurated);
+          }
+        } else {
+          console.log(`   ⏭️  Article already exists, skipping`);
+        }
+
+        return;
+      }
+
+      // No match found - check if this conflict ID already exists
       const existing = await storage.getConflict(conflict.id);
 
       if (existing) {
-        // Skip auto-updating curated conflicts (they should only be updated manually via seed script)
-        if (curatedConflictIds.has(conflict.id)) {
-          console.log(`Skipping curated conflict (manual updates only): ${conflict.name}`);
-          return;
-        }
-
-        // Update if casualties or other data changed significantly
+        // Update existing auto-ingested conflict
         if (this.shouldUpdate(existing, conflict)) {
           await storage.updateConflict(conflict.id, conflict);
           results.updated++;
-          console.log(`Updated: ${conflict.name}`);
+          console.log(`Updated auto-ingested: ${conflict.name}`);
 
           // Broadcast update via WebSocket
           if (this.wss) {
@@ -256,16 +313,13 @@ export class DataIngestionService {
           }
         }
       } else {
-        // Don't auto-create conflicts with curated IDs (they should be created via seed script)
-        if (curatedConflictIds.has(conflict.id)) {
-          console.log(`Skipping curated conflict (not yet seeded): ${conflict.name}`);
-          return;
-        }
-
-        // Create new conflict
-        await storage.createConflict(conflict);
+        // Create new auto-ingested conflict (no curated match found)
+        await storage.createConflict({
+          ...conflict,
+          isAutoIngested: true, // Mark as auto-ingested
+        });
         results.added++;
-        console.log(`Added: ${conflict.name}`);
+        console.log(`➕ Added new auto-ingested conflict: ${conflict.name}`);
 
         // Broadcast addition via WebSocket
         if (this.wss) {
@@ -275,6 +329,19 @@ export class DataIngestionService {
     } catch (error) {
       console.error(`Error upserting conflict ${conflict.id}:`, error);
       throw error;
+    }
+  }
+
+  /**
+   * Extract source name from URL
+   */
+  private extractSource(url: string): string {
+    try {
+      const hostname = new URL(url).hostname;
+      // Remove www. and extract domain name
+      return hostname.replace('www.', '').split('.')[0];
+    } catch {
+      return 'Unknown';
     }
   }
 

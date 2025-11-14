@@ -19,6 +19,17 @@ export interface Conflict {
     url: string;
   }[];
   status: 'active' | 'resolved' | 'ongoing';
+
+  // Recent auto-updated data
+  recentArticles?: {
+    url: string;
+    title: string;
+    source: string;
+    publishedAt: string;
+  }[];
+  recentSummary?: string;
+  recentDataUpdated?: string;
+  isAutoIngested?: boolean;
 }
 
 export interface FilterState {
