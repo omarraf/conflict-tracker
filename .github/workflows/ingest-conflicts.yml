@@ -1,0 +1,36 @@
+name: Ingest Conflict Data
+
+on:
+  schedule:
+    # Run daily at 2:00 AM UTC
+    - cron: '0 2 * * *'
+
+  # Allow manual triggering from GitHub Actions tab
+  workflow_dispatch:
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run data ingestion
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          ACLED_API_KEY: ${{ secrets.ACLED_API_KEY }}
+          ACLED_EMAIL: ${{ secrets.ACLED_EMAIL }}
+        run: npm run ingest
+
+      - name: Log completion
+        run: echo "✅ Conflict data ingestion completed successfully at $(date)"
