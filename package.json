@@ -9,6 +9,7 @@
     "start": "NODE_ENV=production node dist/index.js",
     "check": "tsc",
     "ingest": "tsx scripts/ingest.ts",
+    "seed": "tsx scripts/seed-curated-conflicts.ts",
     "db:push": "drizzle-kit push",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "tsx server/migrate.ts",

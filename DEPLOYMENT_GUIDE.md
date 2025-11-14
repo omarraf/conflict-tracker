@@ -49,6 +49,38 @@ npm run db:push
 
 You should see output confirming the `conflicts` and `users` tables were created.
 
+### 1.3 Seed Curated Conflicts
+
+Populate your database with major ongoing conflicts (Gaza, Ukraine, Sudan, etc.):
+
+```bash
+# Seed the database with 15 curated major conflicts
+npm run seed
+```
+
+Expected output:
+```
+🌍 Seeding Database with Curated Conflicts
+📂 Loaded 15 curated conflicts from file
+
+   ✨ Added: Gaza-Israel War
+   ✨ Added: Sudan Civil War
+   ✨ Added: Ukraine-Russia War
+   ...
+
+✅ Seeding Completed
+   ✨ Conflicts Added:   15
+   🔄 Conflicts Updated: 0
+   ❌ Errors:            0
+```
+
+**What this does:**
+- Adds 15 major ongoing conflicts with proper historical start dates
+- These conflicts won't be overwritten by auto-ingestion
+- You can manually update them anytime by re-running `npm run seed`
+
+**To add more conflicts:** See `/data/HOW_TO_ADD_CONFLICTS.md` for detailed instructions.
+
 ---
 
 ## 🔐 Step 2: Configure GitHub Secrets

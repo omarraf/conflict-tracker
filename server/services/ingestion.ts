@@ -10,12 +10,33 @@ import { acledService } from './acled';
 import { storage } from '../storage';
 import type { InsertConflict } from '@shared/schema';
 import { WebSocketServer } from 'ws';
+import { readFile } from 'fs/promises';
+import { join } from 'path';
+
+// List of curated conflict IDs that should not be auto-updated
+let curatedConflictIds: Set<string> = new Set();
 
 export class DataIngestionService {
   private wss: WebSocketServer | null = null;
 
   constructor(wss?: WebSocketServer) {
     this.wss = wss || null;
+    this.loadCuratedIds();
+  }
+
+  /**
+   * Load list of curated conflict IDs that should not be auto-updated
+   */
+  private async loadCuratedIds(): Promise<void> {
+    try {
+      const filePath = join(process.cwd(), 'data', 'curated-ids.json');
+      const fileContent = await readFile(filePath, 'utf-8');
+      const ids: string[] = JSON.parse(fileContent);
+      curatedConflictIds = new Set(ids);
+      console.log(`Loaded ${curatedConflictIds.size} curated conflict IDs (will not auto-update)`);
+    } catch (error) {
+      console.warn('Could not load curated conflict IDs, auto-ingestion may overwrite curated conflicts:', error);
+    }
   }
 
   /**
@@ -217,6 +238,12 @@ export class DataIngestionService {
       const existing = await storage.getConflict(conflict.id);
 
       if (existing) {
+        // Skip auto-updating curated conflicts (they should only be updated manually via seed script)
+        if (curatedConflictIds.has(conflict.id)) {
+          console.log(`Skipping curated conflict (manual updates only): ${conflict.name}`);
+          return;
+        }
+
         // Update if casualties or other data changed significantly
         if (this.shouldUpdate(existing, conflict)) {
           await storage.updateConflict(conflict.id, conflict);
@@ -229,6 +256,12 @@ export class DataIngestionService {
           }
         }
       } else {
+        // Don't auto-create conflicts with curated IDs (they should be created via seed script)
+        if (curatedConflictIds.has(conflict.id)) {
+          console.log(`Skipping curated conflict (not yet seeded): ${conflict.name}`);
+          return;
+        }
+
         // Create new conflict
         await storage.createConflict(conflict);
         results.added++;
