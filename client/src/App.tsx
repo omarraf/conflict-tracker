@@ -59,6 +59,10 @@ function App() {
   const filteredConflicts = useMemo(() => {
     let filtered = conflicts;
 
+    // IMPORTANT: Hide auto-ingested conflicts (pending review) from map
+    // Only show manually curated conflicts
+    filtered = filtered.filter((c) => !c.isAutoIngested);
+
     // Filter by region
     if (filters.region !== 'All Regions') {
       filtered = filtered.filter((c) => c.region === filters.region);
