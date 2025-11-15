@@ -93,7 +93,8 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getConflicts(): Promise<Conflict[]> {
-    return await this.db.select().from(conflicts);
+    // Return only curated conflicts, exclude auto-ingested ones
+    return await this.db.select().from(conflicts).where(eq(conflicts.isAutoIngested, false));
   }
 
   async getConflict(id: string): Promise<Conflict | undefined> {
