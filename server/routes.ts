@@ -3,6 +3,8 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { WebSocketServer } from "ws";
 import { getScheduler } from "./services/scheduler";
+import { insertConflictSchema } from "@shared/schema";
+import { z } from "zod";
 
 function broadcastUpdate(wss: WebSocketServer, type: string, data: any) {
   const message = JSON.stringify({ type, data, timestamp: new Date().toISOString() });
@@ -15,7 +17,19 @@ function broadcastUpdate(wss: WebSocketServer, type: string, data: any) {
 
 export async function registerRoutes(app: Express): Promise<Server> {
   const httpServer = createServer(app);
-  const wss = new WebSocketServer({ server: httpServer, path: "/ws" });
+  const wss = new WebSocketServer({
+    server: httpServer,
+    path: "/ws",
+    verifyClient: (info) => {
+      // In production, validate origin
+      if (process.env.NODE_ENV === 'production' && process.env.ALLOWED_ORIGINS) {
+        const allowedOrigins = process.env.ALLOWED_ORIGINS.split(',');
+        const origin = info.origin || info.req.headers.origin;
+        return allowedOrigins.includes(origin as string);
+      }
+      return true;
+    }
+  });
 
   // Start the scheduler for automatic data updates
   if (process.env.DATABASE_URL) {
@@ -28,9 +42,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   wss.on("connection", (ws) => {
     console.log("WebSocket client connected");
-    
-    ws.send(JSON.stringify({ 
-      type: "connected", 
+
+    ws.send(JSON.stringify({
+      type: "connected",
       message: "Connected to conflict updates",
       timestamp: new Date().toISOString()
     }));
@@ -38,10 +52,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     ws.on("close", () => {
       console.log("WebSocket client disconnected");
     });
-  });
-
-  app.get("/api/mapbox-token", (req, res) => {
-    res.json({ token: process.env.MAPBOX_ACCESS_TOKEN || '' });
   });
 
   app.get("/api/conflicts", async (req, res) => {
@@ -56,12 +66,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/conflicts", async (req, res) => {
     try {
-      const newConflict = {
+      // Validate request body
+      const validationResult = insertConflictSchema.safeParse({
         ...req.body,
         id: req.body.id || `conflict-${Date.now()}`,
-      };
+      });
 
-      const created = await storage.createConflict(newConflict);
+      if (!validationResult.success) {
+        return res.status(400).json({
+          error: "Invalid request data",
+          details: validationResult.error.errors,
+        });
+      }
+
+      const created = await storage.createConflict(validationResult.data);
       broadcastUpdate(wss, "conflict:added", created);
       res.status(201).json(created);
     } catch (error) {
@@ -72,7 +90,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put("/api/conflicts/:id", async (req, res) => {
     try {
-      const updated = await storage.updateConflict(req.params.id, req.body);
+      // Validate request body (partial update allowed)
+      const validationResult = insertConflictSchema.partial().safeParse(req.body);
+
+      if (!validationResult.success) {
+        return res.status(400).json({
+          error: "Invalid request data",
+          details: validationResult.error.errors,
+        });
+      }
+
+      const updated = await storage.updateConflict(req.params.id, validationResult.data);
 
       if (!updated) {
         return res.status(404).json({ error: "Conflict not found" });
@@ -99,30 +127,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error deleting conflict:", error);
       res.status(500).json({ error: "Failed to delete conflict" });
-    }
-  });
-
-  // Admin endpoint to manually trigger data ingestion
-  app.post("/api/admin/ingest", async (req, res) => {
-    try {
-      if (!process.env.DATABASE_URL) {
-        return res.status(503).json({ error: "Database not configured" });
-      }
-
-      const scheduler = getScheduler(wss);
-
-      // Trigger ingestion asynchronously
-      scheduler.triggerManualIngestion().catch(error => {
-        console.error('Manual ingestion error:', error);
-      });
-
-      res.json({
-        message: "Data ingestion started",
-        status: "running"
-      });
-    } catch (error) {
-      console.error("Error triggering ingestion:", error);
-      res.status(500).json({ error: "Failed to trigger ingestion" });
     }
   });
 

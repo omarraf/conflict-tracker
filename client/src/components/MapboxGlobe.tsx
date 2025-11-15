@@ -13,22 +13,15 @@ interface MapboxGlobeProps {
   isMobile?: boolean;
 }
 
-export function MapboxGlobe({ 
-  conflicts, 
-  selectedConflict, 
+export function MapboxGlobe({
+  conflicts,
+  selectedConflict,
   onSelectConflict,
-  isMobile = false 
+  isMobile = false
 }: MapboxGlobeProps) {
   const mapRef = useRef<MapRef>(null);
-  const [mapboxToken, setMapboxToken] = useState<string>('');
+  const mapboxToken = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN || '';
   const [mapError, setMapError] = useState<string>('');
-
-  useEffect(() => {
-    fetch('/api/mapbox-token')
-      .then(res => res.json())
-      .then(data => setMapboxToken(data.token))
-      .catch(err => console.error('Failed to fetch Mapbox token:', err));
-  }, []);
 
   // Center on selected conflict
   useEffect(() => {
