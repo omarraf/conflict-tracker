@@ -20,7 +20,7 @@ export default async function handler(
     // Connect to Neon PostgreSQL
     const sql = neon(process.env.DATABASE_URL!);
 
-    // Fetch conflicts from last 3 years
+    // Fetch conflicts from last 3 years (curated conflicts only, exclude auto-ingested)
     const conflicts = await sql`
       SELECT
         id,
@@ -36,10 +36,12 @@ export default async function handler(
         media_links as "mediaLinks",
         educational_resources as "educationalResources",
         status,
+        is_auto_ingested as "isAutoIngested",
         created_at as "createdAt",
         updated_at as "updatedAt"
       FROM conflicts
       WHERE start_date > NOW() - INTERVAL '3 years'
+        AND is_auto_ingested = false
       ORDER BY updated_at DESC
     `;
 
