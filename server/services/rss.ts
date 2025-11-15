@@ -36,7 +36,7 @@ export class RSSService {
     // BBC News
     {
       name: 'BBC World',
-      url: 'http://feeds.bbci.co.uk/news/world/rss.xml',
+      url: 'https://feeds.bbci.co.uk/news/world/rss.xml',
       region: 'Global',
     },
     // Crisis Group

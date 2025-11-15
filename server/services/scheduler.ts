@@ -128,13 +128,6 @@ export class SchedulerService {
     }
   }
 
-  /**
-   * Manually trigger daily ingestion (for testing)
-   */
-  async triggerManualIngestion(): Promise<void> {
-    console.log('Manual ingestion triggered');
-    await this.runDailyIngestion();
-  }
 }
 
 let schedulerInstance: SchedulerService | null = null;

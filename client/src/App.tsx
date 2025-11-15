@@ -108,8 +108,6 @@ function App() {
     return filtered;
   }, [filters, conflicts]);
 
-  console.log('Filtered conflicts count:', filteredConflicts.length);
-
   const toggleComparison = (conflict: Conflict) => {
     setComparisonConflicts((prev) => {
       const exists = prev.find((c) => c.id === conflict.id);
