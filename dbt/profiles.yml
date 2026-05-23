@@ -1,0 +1,19 @@
+# Copy this file to ~/.dbt/profiles.yml, or set DBT_PROFILES_DIR=./dbt
+# Fill in env vars from your Neon connection string.
+#
+# Neon URL format:
+#   postgresql://<user>:<password>@<host>/<dbname>?sslmode=require
+#
+conflict_tracker:
+  target: dev
+  outputs:
+    dev:
+      type: postgres
+      host: "{{ env_var('DBT_HOST') }}"
+      port: 5432
+      user: "{{ env_var('DBT_USER') }}"
+      password: "{{ env_var('DBT_PASSWORD') }}"
+      dbname: "{{ env_var('DBT_DBNAME') }}"
+      schema: public
+      sslmode: require
+      threads: 4

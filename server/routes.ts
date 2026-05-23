@@ -143,6 +143,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Analytics endpoints — powered by dbt mart tables
+  app.get("/api/analytics/regional-trends", async (req, res) => {
+    try {
+      const trends = await storage.getRegionalTrends();
+      res.json(trends);
+    } catch (error) {
+      console.error("Error fetching regional trends:", error);
+      res.status(500).json({ error: "Failed to fetch regional trends" });
+    }
+  });
+
+  app.get("/api/analytics/casualties-timeline", async (req, res) => {
+    try {
+      const timeline = await storage.getCasualtiesTimeline();
+      res.json(timeline);
+    } catch (error) {
+      console.error("Error fetching casualties timeline:", error);
+      res.status(500).json({ error: "Failed to fetch casualties timeline" });
+    }
+  });
+
   // Health check endpoint
   app.get("/api/health", (req, res) => {
     res.json({

@@ -1,0 +1,26 @@
+version: 2
+
+models:
+  - name: stg_gdelt_events
+    description: Staging layer for raw GDELT events — casts and renames only
+    columns:
+      - name: event_id
+        tests: [unique, not_null]
+      - name: severity
+        tests:
+          - accepted_values:
+              values: ['low', 'medium', 'high', 'critical']
+
+  - name: stg_acled_events
+    description: Staging layer for raw ACLED events
+    columns:
+      - name: event_id
+        tests: [unique, not_null]
+
+  - name: stg_rss_articles
+    description: Staging layer for raw RSS articles
+    columns:
+      - name: article_id
+        tests: [unique, not_null]
+      - name: url
+        tests: [unique, not_null]

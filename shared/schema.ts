@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, timestamp, real, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, real, jsonb, date } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -85,3 +85,42 @@ export const selectConflictSchema = createSelectSchema(conflicts);
 
 export type InsertConflict = z.infer<typeof insertConflictSchema>;
 export type Conflict = typeof conflicts.$inferSelect;
+
+// ── Raw ingestion tables (written by Kafka consumer, read by dbt) ────────────
+
+export const rawGdeltEvents = pgTable("raw_gdelt_events", {
+  id: serial("id").primaryKey(),
+  ingestedAt: timestamp("ingested_at").notNull().defaultNow(),
+  countryCode: text("country_code").notNull(),
+  country: text("country").notNull(),
+  region: text("region").notNull(),
+  severity: text("severity").notNull().$type<'low' | 'medium' | 'high' | 'critical'>(),
+  avgTone: real("avg_tone").notNull(),
+  articleCount: integer("article_count").notNull(),
+  rawPayload: jsonb("raw_payload").notNull(),
+});
+
+export const rawAcledEvents = pgTable("raw_acled_events", {
+  id: serial("id").primaryKey(),
+  ingestedAt: timestamp("ingested_at").notNull().defaultNow(),
+  eventDate: text("event_date").notNull(),
+  country: text("country").notNull(),
+  location: text("location").notNull().default(''),
+  eventType: text("event_type").notNull().default(''),
+  fatalities: integer("fatalities").notNull().default(0),
+  rawPayload: jsonb("raw_payload").notNull(),
+});
+
+export const rawRssArticles = pgTable("raw_rss_articles", {
+  id: serial("id").primaryKey(),
+  ingestedAt: timestamp("ingested_at").notNull().defaultNow(),
+  publishedAt: text("published_at").notNull().default(''),
+  title: text("title").notNull(),
+  url: text("url").notNull().unique(),
+  sourceFeed: text("source_feed").notNull().default(''),
+  rawPayload: jsonb("raw_payload").notNull(),
+});
+
+export type InsertRawGdeltEvent = typeof rawGdeltEvents.$inferInsert;
+export type InsertRawAcledEvent = typeof rawAcledEvents.$inferInsert;
+export type InsertRawRssArticle = typeof rawRssArticles.$inferInsert;

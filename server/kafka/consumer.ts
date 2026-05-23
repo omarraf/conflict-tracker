@@ -4,6 +4,8 @@ import { z } from 'zod';
 import { storage } from '../storage';
 import { findMatchingCuratedConflict, isDuplicateArticle, filterRecentArticles } from '../services/matching';
 import { publishUpdate } from './producer';
+import { getDb } from '../db';
+import { rawGdeltEvents } from '@shared/schema';
 
 // ── Incoming message schema (matches ConflictArticleMessage in Python) ──────
 
@@ -92,6 +94,23 @@ function broadcast(wss: WebSocketServer, type: string, data: unknown): void {
 
 // ── Per-message handler ──────────────────────────────────────────────────────
 
+async function writeRawEvent(msg: ConflictArticleMessage): Promise<void> {
+  try {
+    const db = getDb();
+    await db.insert(rawGdeltEvents).values({
+      countryCode: msg.country_code,
+      country: msg.country,
+      region: msg.region,
+      severity: msg.severity,
+      avgTone: msg.avg_tone,
+      articleCount: msg.article_count,
+      rawPayload: msg as unknown as Record<string, unknown>,
+    });
+  } catch (err) {
+    console.error('[kafka-consumer] failed to write raw event:', err);
+  }
+}
+
 async function handleMessage(
   raw: string,
   wss: WebSocketServer,
@@ -103,6 +122,10 @@ async function handleMessage(
   }
 
   const msg = parsed.data;
+
+  // Write to raw table for dbt to consume
+  await writeRawEvent(msg);
+
   const conflict = toInsertConflict(msg);
   const allConflicts = await storage.getConflicts();
 

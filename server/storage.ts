@@ -1,6 +1,23 @@
 import { users, conflicts, type User, type InsertUser, type Conflict, type InsertConflict } from "@shared/schema";
 import { getDb } from "./db";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
+
+export interface RegionalTrend {
+  region: string;
+  week: string;
+  severity: string;
+  event_count: number;
+  avg_tone: number;
+  total_articles: number;
+}
+
+export interface CasualtyDataPoint {
+  day: string;
+  country: string;
+  region: string;
+  total_fatalities: number;
+  event_count: number;
+}
 
 // modify the interface with any CRUD methods
 // you might need
@@ -16,6 +33,10 @@ export interface IStorage {
   createConflict(conflict: InsertConflict): Promise<Conflict>;
   updateConflict(id: string, conflict: Partial<InsertConflict>): Promise<Conflict | undefined>;
   deleteConflict(id: string): Promise<boolean>;
+
+  // dbt mart reads (tables created by dbt, not Drizzle)
+  getRegionalTrends(): Promise<RegionalTrend[]>;
+  getCasualtiesTimeline(): Promise<CasualtyDataPoint[]>;
 }
 
 export class MemStorage implements IStorage {
@@ -66,6 +87,14 @@ export class MemStorage implements IStorage {
 
   async deleteConflict(id: string): Promise<boolean> {
     throw new Error("Database not configured. Set DATABASE_URL environment variable.");
+  }
+
+  async getRegionalTrends(): Promise<RegionalTrend[]> {
+    return [];
+  }
+
+  async getCasualtiesTimeline(): Promise<CasualtyDataPoint[]> {
+    return [];
   }
 }
 
@@ -119,6 +148,32 @@ export class DatabaseStorage implements IStorage {
   async deleteConflict(id: string): Promise<boolean> {
     const result = await this.db.delete(conflicts).where(eq(conflicts.id, id)).returning();
     return result.length > 0;
+  }
+
+  async getRegionalTrends(): Promise<RegionalTrend[]> {
+    try {
+      const result = await this.db.execute(
+        sql`SELECT region, week::text, severity, event_count, avg_tone, total_articles
+            FROM agg_regional_trends
+            ORDER BY week DESC, region`
+      );
+      return result.rows as unknown as RegionalTrend[];
+    } catch {
+      return [];
+    }
+  }
+
+  async getCasualtiesTimeline(): Promise<CasualtyDataPoint[]> {
+    try {
+      const result = await this.db.execute(
+        sql`SELECT day::text, country, region, total_fatalities, event_count
+            FROM agg_casualties_over_time
+            ORDER BY day DESC`
+      );
+      return result.rows as unknown as CasualtyDataPoint[];
+    } catch {
+      return [];
+    }
   }
 }
 

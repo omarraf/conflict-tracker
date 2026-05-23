@@ -1,0 +1,30 @@
+version: 2
+
+sources:
+  - name: raw
+    schema: public
+    description: Raw ingestion tables written by the Kafka consumer
+    tables:
+      - name: raw_gdelt_events
+        description: One row per GDELT country-grouped article cluster from Kafka
+        columns:
+          - name: id
+            tests: [unique, not_null]
+          - name: ingested_at
+            tests: [not_null]
+          - name: country_code
+            tests: [not_null]
+
+      - name: raw_acled_events
+        description: One row per ACLED conflict event from Kafka
+        columns:
+          - name: id
+            tests: [unique, not_null]
+
+      - name: raw_rss_articles
+        description: One row per RSS article from Kafka
+        columns:
+          - name: id
+            tests: [unique, not_null]
+          - name: url
+            tests: [unique]

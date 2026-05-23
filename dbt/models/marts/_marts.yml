@@ -1,0 +1,24 @@
+version: 2
+
+models:
+  - name: fct_conflicts
+    description: One row per country, current auto-ingested conflict state. Consumed by GET /api/conflicts (auto) and the globe frontend.
+    columns:
+      - name: id
+        tests: [unique, not_null]
+      - name: severity
+        tests:
+          - accepted_values:
+              values: ['low', 'medium', 'high', 'critical']
+
+  - name: fct_conflict_articles
+    description: Exploded articles from GDELT raw payloads, one row per article.
+    columns:
+      - name: url
+        tests: [not_null]
+
+  - name: agg_regional_trends
+    description: Weekly event count, avg tone, and article volume by region and severity. Consumed by GET /api/analytics/regional-trends.
+
+  - name: agg_casualties_over_time
+    description: Daily fatality rollup from ACLED by country. Consumed by GET /api/analytics/casualties-timeline.
