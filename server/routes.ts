@@ -3,6 +3,8 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { WebSocketServer } from "ws";
 import { getScheduler } from "./services/scheduler";
+import { startKafkaConsumer, stopKafkaConsumer } from "./kafka/consumer";
+import { disconnectProducer } from "./kafka/producer";
 import { insertConflictSchema } from "@shared/schema";
 import { z } from "zod";
 
@@ -31,8 +33,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Start the scheduler for automatic data updates
-  if (process.env.DATABASE_URL) {
+  // Ingestion: Kafka consumer (Phase 2) takes priority; fall back to scheduler.
+  if (process.env.KAFKA_BOOTSTRAP_SERVERS) {
+    console.log('Kafka configured — starting KafkaJS consumer (scheduler disabled)');
+    startKafkaConsumer(wss).catch((err) => {
+      console.error('Failed to start Kafka consumer:', err);
+    });
+
+    // Clean up on server shutdown
+    process.on('SIGTERM', async () => {
+      await stopKafkaConsumer();
+      await disconnectProducer();
+    });
+  } else if (process.env.DATABASE_URL) {
     console.log('Initializing automatic data ingestion scheduler...');
     const scheduler = getScheduler(wss);
     scheduler.start();

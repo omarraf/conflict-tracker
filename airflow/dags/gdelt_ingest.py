@@ -8,45 +8,24 @@ Pipeline:
 
 from __future__ import annotations
 
-import json
 import os
+import sys
 from datetime import datetime, timedelta, timezone
 from typing import Any
 
-import requests
 from airflow.decorators import dag, task
 from airflow.providers.http.sensors.http import HttpSensor
 
+# Make pipeline/ importable inside the container.
+# The repo root is mounted at /opt/airflow; adjust if your volume differs.
+_REPO_ROOT = os.path.join(os.path.dirname(__file__), "..", "..", "..")
+if _REPO_ROOT not in sys.path:
+    sys.path.insert(0, _REPO_ROOT)
+
 from operators.kafka_publish_operator import KafkaPublishOperator
+from pipeline.producers.gdelt_producer import fetch_articles, transform
 
-GDELT_BASE_URL = os.getenv(
-    "GDELT_API_URL", "https://api.gdeltproject.org/api/v2/doc/doc"
-)
-QUERY = "conflict OR war OR violence OR attack OR terrorism OR military"
-MAX_RECORDS = 250
 TOPIC = "conflict-articles"
-
-COUNTRY_CODES: dict[str, str] = {
-    "US": "United States", "UA": "Ukraine", "RU": "Russia",
-    "IL": "Israel", "PS": "Palestine", "SY": "Syria", "IQ": "Iraq",
-    "AF": "Afghanistan", "YE": "Yemen", "SO": "Somalia", "SD": "Sudan",
-    "MM": "Myanmar", "CN": "China", "IN": "India", "PK": "Pakistan",
-    "NG": "Nigeria", "ET": "Ethiopia", "VE": "Venezuela",
-    "CO": "Colombia", "MX": "Mexico",
-}
-
-REGION_MAP: dict[str, str] = {
-    "United States": "North America", "Mexico": "Central America",
-    "Ukraine": "Eastern Europe", "Russia": "Eastern Europe",
-    "Israel": "Middle East", "Palestine": "Middle East",
-    "Syria": "Middle East", "Iraq": "Middle East", "Yemen": "Middle East",
-    "Afghanistan": "Central Asia", "Pakistan": "South Asia",
-    "India": "South Asia", "China": "East Asia", "Myanmar": "Southeast Asia",
-    "Somalia": "East Africa", "Ethiopia": "East Africa",
-    "Sudan": "North Africa", "Nigeria": "West Africa",
-    "Colombia": "South America", "Venezuela": "South America",
-}
-
 
 default_args = {
     "owner": "conflict-tracker",
@@ -67,7 +46,6 @@ default_args = {
 )
 def gdelt_ingest():
 
-    # --- Sensor: wait for GDELT API to be reachable ---
     check_availability = HttpSensor(
         task_id="check_availability",
         http_conn_id="gdelt_api",
@@ -87,81 +65,24 @@ def gdelt_ingest():
 
     @task(task_id="extract_articles")
     def extract_articles(**context: Any) -> list[dict]:
-        """Fetch raw articles from GDELT DOC API."""
-        params = {
-            "query": QUERY,
-            "mode": "ArtList",
-            "maxrecords": str(MAX_RECORDS),
-            "format": "json",
-            "timespan": "1h",
-        }
-        resp = requests.get(GDELT_BASE_URL, params=params, timeout=30)
-        resp.raise_for_status()
-
-        articles: list[dict] = resp.json().get("articles", [])
-        print(f"Extracted {len(articles)} articles from GDELT")
-
-        # Push record count via XCom for downstream logging
+        articles = fetch_articles(hours_back=1)
         context["ti"].xcom_push(key="raw_count", value=len(articles))
         return articles
 
     @task(task_id="transform_articles")
     def transform_articles(articles: list[dict], **context: Any) -> list[dict]:
-        """
-        Group articles by country, calculate severity, and return
-        structured message dicts ready for Kafka.
-        """
-        grouped: dict[str, list[dict]] = {}
-        for article in articles:
-            country_codes = (article.get("seencc") or "").split(",")
-            key = country_codes[0].strip().upper() if country_codes else "XX"
-            grouped.setdefault(key, []).append(article)
-
-        messages: list[dict] = []
-        for cc, group in grouped.items():
-            country = COUNTRY_CODES.get(cc)
-            if not country:
-                continue
-
-            tones = [float(a["tone"]) for a in group if a.get("tone")]
-            avg_tone = sum(tones) / len(tones) if tones else 0.0
-            volume = len(group)
-
-            if avg_tone < -5 or volume > 50:
-                severity = "critical"
-            elif avg_tone < -2 or volume > 20:
-                severity = "high"
-            elif avg_tone < 0 or volume > 10:
-                severity = "medium"
-            else:
-                severity = "low"
-
-            messages.append({
-                "source": "gdelt",
-                "country_code": cc,
-                "country": country,
-                "region": REGION_MAP.get(country, "Other"),
-                "severity": severity,
-                "avg_tone": round(avg_tone, 2),
-                "article_count": volume,
-                "articles": [
-                    {
-                        "url": a.get("url", ""),
-                        "title": a.get("title", ""),
-                        "domain": a.get("domain", ""),
-                        "seen_at": a.get("seendatetime", ""),
-                    }
-                    for a in group[:5]
-                ],
-                "ingested_at": datetime.now(timezone.utc).isoformat(),
-            })
-
-        print(f"Transformed {len(articles)} articles → {len(messages)} country groups")
-        context["ti"].xcom_push(key="message_count", value=len(messages))
-        return messages
+        messages = transform(articles)
+        serialized = [m.model_dump() for m in messages]
+        context["ti"].xcom_push(key="message_count", value=len(serialized))
+        return serialized
 
     def _get_messages(**context: Any) -> list[dict]:
-        return context["ti"].xcom_pull(task_ids="transform_articles")
+        from pydantic import TypeAdapter
+        from pipeline.schemas.conflict_article import ConflictArticleMessage
+
+        raw = context["ti"].xcom_pull(task_ids="transform_articles")
+        ta = TypeAdapter(list[ConflictArticleMessage])
+        return ta.validate_python(raw)
 
     publish = KafkaPublishOperator(
         task_id="publish_to_kafka",
@@ -170,7 +91,6 @@ def gdelt_ingest():
         key_field="country_code",
     )
 
-    # --- Wire up the DAG ---
     raw = extract_articles()
     transformed = transform_articles(raw)
     check_availability >> raw >> transformed >> publish
